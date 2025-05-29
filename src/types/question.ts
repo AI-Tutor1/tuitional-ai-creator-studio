@@ -9,7 +9,7 @@ export interface QuestionMetadata {
   // Examination Details
   level: ('IGCSE' | 'GCSE' | 'A-Level' | 'O-Level')[];
   board: string[];
-  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Pro';
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Pro' | 'Foundation' | 'Core' | 'Higher' | 'Extended';
   year: number[];
   paperType: string[];
   paperCode: string[];
