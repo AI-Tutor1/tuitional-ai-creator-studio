@@ -3,71 +3,59 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash2,
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Search,
+  Filter,
+  Plus,
+  BookOpen,
+  BarChart3,
+  Download,
+  Upload,
+  Star,
   Clock,
   Users,
+  TrendingUp,
+  Eye,
+  Edit,
+  Trash2,
   FileText,
-  MoreVertical,
   CheckSquare,
   Calculator,
   Image as ImageIcon,
-  BookOpen,
-  BarChart3,
-  ChevronDown,
-  ChevronRight,
-  Grid,
-  List,
-  Download,
-  RefreshCw,
-  Star,
-  Copy
+  Brain,
+  Target
 } from 'lucide-react';
-import Navigation from '@/components/Navigation';
-import AdvancedQuestionAnalytics from '@/components/question-bank/AdvancedQuestionAnalytics';
 import { EnhancedQuestion } from '@/types/question';
+import AdvancedQuestionAnalytics from '@/components/question-bank/AdvancedQuestionAnalytics';
 
-const EnhancedQuestionBank = () => {
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-  const [selectedQuestion, setSelectedQuestion] = useState<EnhancedQuestion | null>(null);
+const EnhancedQuestionBank: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(true);
-  const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
-  
-  const [filters, setFilters] = useState({
-    subject: '',
-    grade: '',
-    curriculum: '',
-    level: '',
-    board: '',
-    difficulty: '',
-    year: '',
-    paperType: '',
-    questionType: '',
-    bloomsLevel: '',
-    status: '',
-    creator: '',
-    tags: [] as string[],
-    difficultyRange: [0, 1] as [number, number],
-    discriminationRange: [-1, 1] as [number, number],
-    dateAdded: '',
-    dateModified: ''
+  const [selectedFilters, setSelectedFilters] = useState({
+    subjects: [] as string[],
+    grades: [] as string[],
+    curricula: [] as string[],
+    difficulties: [] as string[],
+    questionTypes: [] as string[],
+    topics: [] as string[],
+    boards: [] as string[],
+    years: [] as string[],
+    bloomsLevels: [] as string[]
   });
+  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState('grid');
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
-  const mockQuestions: EnhancedQuestion[] = [
+  // Mock questions data with enhanced metadata
+  const questions: EnhancedQuestion[] = [
     {
-      id: 'q1',
+      id: '1',
       questionNumber: 1,
       type: 'question',
       subType: 'mcq',
@@ -81,6 +69,8 @@ const EnhancedQuestionBank = () => {
       skipRate: 12.6,
       hintUsage: 34.8,
       successRate: 68.4,
+      viewCount: 1250,
+      completionRate: 87.4,
       mcqOptions: [
         { id: '1', text: 'Absorbing light energy', isCorrect: true },
         { id: '2', text: 'Storing glucose', isCorrect: false },
@@ -95,7 +85,7 @@ const EnhancedQuestionBank = () => {
         level: ['IGCSE'],
         board: ['Cambridge'],
         difficulty: 'Easy',
-        year: [2023],
+        year: [2023, 2022],
         paperType: ['Theory'],
         paperCode: ['0610/11'],
         attempt: [1],
@@ -109,16 +99,14 @@ const EnhancedQuestionBank = () => {
         difficultyIndex: 0.73,
         discriminationIndex: 0.45,
         bloomsLevel: 'Remember'
-      },
-      createdAt: '2024-01-15',
-      version: 1
+      }
     },
     {
-      id: 'q2',
+      id: '2',
       questionNumber: 2,
       type: 'question',
       subType: 'short',
-      text: 'Explain the role of stomata in photosynthesis and describe how environmental factors affect their opening and closing.',
+      text: 'Explain how environmental factors affect the rate of photosynthesis.',
       marks: 6,
       includeAnswer: true,
       includeDiagram: false,
@@ -128,31 +116,10 @@ const EnhancedQuestionBank = () => {
       skipRate: 18.2,
       hintUsage: 42.1,
       successRate: 58.7,
-      subparts: [
-        {
-          id: 'a',
-          partNumber: 'a',
-          text: 'Define stomata and describe their structure',
-          marks: 2,
-          subType: 'short'
-        },
-        {
-          id: 'b',
-          partNumber: 'b',
-          text: 'Explain their role in gas exchange during photosynthesis',
-          marks: 2,
-          subType: 'short'
-        },
-        {
-          id: 'c',
-          partNumber: 'c',
-          text: 'Describe how light intensity and CO2 concentration affect stomatal behavior',
-          marks: 2,
-          subType: 'short'
-        }
-      ],
+      viewCount: 890,
+      completionRate: 81.8,
       metadata: {
-        topic: ['Photosynthesis', 'Plant Structure', 'Gas Exchange'],
+        topic: ['Photosynthesis', 'Environmental Factors'],
         subject: 'Biology',
         grade: ['10th', '11th'],
         curriculum: ['IGCSE'],
@@ -168,21 +135,19 @@ const EnhancedQuestionBank = () => {
         variant: [2],
         marks: 6,
         estimatedTime: 240,
-        tags: ['stomata', 'gas exchange', 'environmental factors'],
-        learningObjectives: ['Understand plant structures', 'Analyze environmental effects'],
+        tags: ['environmental factors', 'limiting factors'],
+        learningObjectives: ['Analyze environmental effects'],
         difficultyIndex: 0.66,
         discriminationIndex: 0.52,
         bloomsLevel: 'Understand'
-      },
-      createdAt: '2024-01-12',
-      version: 1
+      }
     },
     {
-      id: 'q3',
+      id: '3',
       questionNumber: 3,
       type: 'question',
       subType: 'numerical',
-      text: 'A student investigates the rate of photosynthesis by counting oxygen bubbles produced by aquatic plants under different light intensities. Calculate the rate of photosynthesis given the data.',
+      text: 'Calculate the rate of oxygen production in photosynthesis given the experimental data.',
       marks: 8,
       includeAnswer: true,
       includeDiagram: true,
@@ -192,31 +157,31 @@ const EnhancedQuestionBank = () => {
       skipRate: 25.6,
       hintUsage: 61.5,
       successRate: 42.3,
+      viewCount: 623,
+      completionRate: 74.4,
       metadata: {
-        topic: ['Photosynthesis', 'Experimental Design', 'Data Analysis'],
+        topic: ['Photosynthesis', 'Experimental Design'],
         subject: 'Biology',
         grade: ['11th', '12th'],
         curriculum: ['IGCSE', 'A-Level'],
-        level: ['IGCSE', 'A-Level'],
-        board: ['Cambridge', 'Edexcel'],
+        level: ['IGCSE'],
+        board: ['Cambridge'],
         difficulty: 'Hard',
-        year: [2023, 2022],
-        paperType: ['Theory', 'Practical'],
-        paperCode: ['0610/31', '9700/31'],
-        attempt: [1, 2],
-        syllabusCode: ['0610', '9700'],
-        syllabusType: ['Extended', 'Higher'],
-        variant: [1, 3],
+        year: [2023],
+        paperType: ['Practical'],
+        paperCode: ['0610/31'],
+        attempt: [1],
+        syllabusCode: ['0610'],
+        syllabusType: ['Extended'],
+        variant: [3],
         marks: 8,
         estimatedTime: 420,
-        tags: ['calculation', 'experimental', 'data analysis'],
-        learningObjectives: ['Apply mathematical skills', 'Analyze experimental data'],
+        tags: ['calculation', 'practical', 'data analysis'],
+        learningObjectives: ['Apply mathematical skills'],
         difficultyIndex: 0.42,
         discriminationIndex: 0.38,
         bloomsLevel: 'Apply'
-      },
-      createdAt: '2024-01-10',
-      version: 2
+      }
     }
   ];
 
@@ -248,478 +213,318 @@ const EnhancedQuestionBank = () => {
     return 'text-red-600';
   };
 
-  const handleQuestionSelect = (questionId: string) => {
-    setSelectedQuestions(prev => 
-      prev.includes(questionId) 
-        ? prev.filter(id => id !== questionId)
-        : [...prev, questionId]
-    );
+  const handleAnalyticsView = (questionId: string) => {
+    setSelectedQuestionId(questionId);
+    setShowAnalytics(true);
   };
 
-  const handleSelectAll = () => {
-    setSelectedQuestions(
-      selectedQuestions.length === mockQuestions.length 
-        ? [] 
-        : mockQuestions.map(q => q.id)
-    );
-  };
-
-  if (selectedQuestion) {
+  if (showAnalytics && selectedQuestionId) {
     return (
-      <AdvancedQuestionAnalytics 
-        question={selectedQuestion} 
-        onBack={() => setSelectedQuestion(null)} 
+      <AdvancedQuestionAnalytics
+        questionId={selectedQuestionId}
+        onBack={() => setShowAnalytics(false)}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Question Bank</h1>
-            <p className="text-gray-600">Manage and analyze your question collection</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button className="bg-[#007AFF] hover:bg-[#0056CC] text-white">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Question
-            </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Enhanced Question Bank</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Advanced question management with smart analytics
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <Button variant="outline">
+                <Upload className="mr-2 h-4 w-4" />
+                Import
+              </Button>
+              <Button variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+              <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Question
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Search and Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {/* Search Bar */}
-              <div className="flex items-center space-x-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Filters Sidebar */}
+          <div className="w-80 bg-white rounded-lg shadow-sm border h-fit">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Filters</h3>
+                <Button variant="ghost" size="sm">Reset</Button>
+              </div>
+
+              {/* Search */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-2 block">Search Questions</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search questions by text, code, or tags..."
+                    placeholder="Search by content, topic, or metadata..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center"
-                >
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filters
-                  {showFilters ? <ChevronDown className="ml-1 h-4 w-4" /> : <ChevronRight className="ml-1 h-4 w-4" />}
-                </Button>
               </div>
 
-              {/* Advanced Filters */}
-              {showFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 pt-4 border-t">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Subject</Label>
-                    <Select value={filters.subject} onValueChange={(value) => setFilters({...filters, subject: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Subjects" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="biology">Biology</SelectItem>
-                        <SelectItem value="chemistry">Chemistry</SelectItem>
-                        <SelectItem value="physics">Physics</SelectItem>
-                        <SelectItem value="mathematics">Mathematics</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <Separator className="mb-6" />
 
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Grade</Label>
-                    <Select value={filters.grade} onValueChange={(value) => setFilters({...filters, grade: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Grades" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="9th">9th Grade</SelectItem>
-                        <SelectItem value="10th">10th Grade</SelectItem>
-                        <SelectItem value="11th">11th Grade</SelectItem>
-                        <SelectItem value="12th">12th Grade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Curriculum</Label>
-                    <Select value={filters.curriculum} onValueChange={(value) => setFilters({...filters, curriculum: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Curricula" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="igcse">IGCSE</SelectItem>
-                        <SelectItem value="a-level">A-Level</SelectItem>
-                        <SelectItem value="gcse">GCSE</SelectItem>
-                        <SelectItem value="o-level">O-Level</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Level</Label>
-                    <Select value={filters.level} onValueChange={(value) => setFilters({...filters, level: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Levels" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="igcse">IGCSE</SelectItem>
-                        <SelectItem value="gcse">GCSE</SelectItem>
-                        <SelectItem value="a-level">A-Level</SelectItem>
-                        <SelectItem value="o-level">O-Level</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Difficulty</Label>
-                    <Select value={filters.difficulty} onValueChange={(value) => setFilters({...filters, difficulty: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Difficulties" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
-                        <SelectItem value="expert">Expert</SelectItem>
-                        <SelectItem value="pro">Pro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Question Type</Label>
-                    <Select value={filters.questionType} onValueChange={(value) => setFilters({...filters, questionType: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mcq">Multiple Choice</SelectItem>
-                        <SelectItem value="short">Short Answer</SelectItem>
-                        <SelectItem value="long">Long Answer</SelectItem>
-                        <SelectItem value="numerical">Numerical</SelectItem>
-                        <SelectItem value="diagram">Diagram</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label className="text-sm font-medium mb-2 block">
-                      Difficulty Index: {filters.difficultyRange[0].toFixed(2)} - {filters.difficultyRange[1].toFixed(2)}
-                    </Label>
-                    <Slider
-                      value={filters.difficultyRange}
-                      onValueChange={(value) => setFilters({...filters, difficultyRange: value as [number, number]})}
-                      max={1}
-                      min={0}
-                      step={0.01}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label className="text-sm font-medium mb-2 block">
-                      Discrimination Index: {filters.discriminationRange[0].toFixed(2)} - {filters.discriminationRange[1].toFixed(2)}
-                    </Label>
-                    <Slider
-                      value={filters.discriminationRange}
-                      onValueChange={(value) => setFilters({...filters, discriminationRange: value as [number, number]})}
-                      max={1}
-                      min={-1}
-                      step={0.01}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button variant="outline" className="w-full">
-                      Reset Filters
-                    </Button>
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button className="w-full bg-[#007AFF] hover:bg-[#0056CC]">
-                      Apply Filters
-                    </Button>
-                  </div>
+              {/* Subject Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Subject</Label>
+                <div className="space-y-2">
+                  {['Biology', 'Chemistry', 'Physics', 'Mathematics'].map(subject => (
+                    <div key={subject} className="flex items-center space-x-2">
+                      <Checkbox id={subject} />
+                      <Label htmlFor={subject} className="text-sm">{subject}</Label>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
 
-        {/* View Controls and Bulk Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant={viewMode === 'table' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => setViewMode('table')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant={viewMode === 'card' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => setViewMode('card')}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
+              {/* Grade Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Grade</Label>
+                <div className="space-y-2">
+                  {['9th', '10th', '11th', '12th'].map(grade => (
+                    <div key={grade} className="flex items-center space-x-2">
+                      <Checkbox id={grade} />
+                      <Label htmlFor={grade} className="text-sm">{grade}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Curriculum Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Curriculum</Label>
+                <div className="space-y-2">
+                  {['IGCSE', 'A-Level', 'GCSE', 'O-Level'].map(curriculum => (
+                    <div key={curriculum} className="flex items-center space-x-2">
+                      <Checkbox id={curriculum} />
+                      <Label htmlFor={curriculum} className="text-sm">{curriculum}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Difficulty Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Difficulty</Label>
+                <div className="space-y-2">
+                  {['Easy', 'Medium', 'Hard', 'Expert', 'Pro'].map(difficulty => (
+                    <div key={difficulty} className="flex items-center space-x-2">
+                      <Checkbox id={difficulty} />
+                      <Label htmlFor={difficulty} className="text-sm">{difficulty}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Question Type Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Question Type</Label>
+                <div className="space-y-2">
+                  {['MCQ', 'Short Answer', 'Long Answer', 'Numerical', 'Diagram'].map(type => (
+                    <div key={type} className="flex items-center space-x-2">
+                      <Checkbox id={type} />
+                      <Label htmlFor={type} className="text-sm">{type}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Year Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Year</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                    <SelectItem value="2022">2022</SelectItem>
+                    <SelectItem value="2021">2021</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Board Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-3 block">Board</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select board" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cambridge">Cambridge</SelectItem>
+                    <SelectItem value="edexcel">Edexcel</SelectItem>
+                    <SelectItem value="aqa">AQA</SelectItem>
+                    <SelectItem value="ocr">OCR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            {selectedQuestions.length > 0 && (
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Header Actions */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-500">
+                  {questions.length} questions found
+                </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="performance">Best Performance</SelectItem>
+                    <SelectItem value="attempts">Most Attempts</SelectItem>
+                    <SelectItem value="difficulty">Difficulty</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">
-                  {selectedQuestions.length} selected
-                </span>
-                <Button variant="outline" size="sm">
-                  <Copy className="mr-1 h-4 w-4" />
-                  Clone
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                >
+                  Grid
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="mr-1 h-4 w-4" />
-                  Export
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Trash2 className="mr-1 h-4 w-4" />
-                  Delete
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                >
+                  List
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>Showing {mockQuestions.length} of {mockQuestions.length} questions</span>
-            <Button variant="ghost" size="sm">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Questions Table/Cards */}
-        {viewMode === 'table' ? (
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox 
-                        checked={selectedQuestions.length === mockQuestions.length}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Question</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Difficulty</TableHead>
-                    <TableHead>Performance</TableHead>
-                    <TableHead>Attempts</TableHead>
-                    <TableHead>Avg. Time</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockQuestions.map((question) => (
-                    <TableRow key={question.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <Checkbox 
-                          checked={selectedQuestions.includes(question.id)}
-                          onCheckedChange={() => handleQuestionSelect(question.id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <div className="font-medium text-gray-900 truncate">
-                            Q{question.questionNumber.toString().padStart(3, '0')}
-                          </div>
-                          <div className="text-sm text-gray-500 truncate">
-                            {question.text}
-                          </div>
-                          {question.subparts && (
-                            <div className="text-xs text-blue-600 mt-1">
-                              {question.subparts.length} subparts
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getQuestionTypeIcon(question.subType)}
-                          <span className="text-sm capitalize">{question.subType}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{question.metadata?.subject}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{question.metadata?.grade?.join(', ')}</span>
-                      </TableCell>
-                      <TableCell>
+            {/* Questions Grid */}
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : 'space-y-4'}>
+              {questions.map((question) => (
+                <Card key={question.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getQuestionTypeIcon(question.subType)}
+                        <Badge variant="outline" className="text-xs">
+                          {question.subType?.toUpperCase()}
+                        </Badge>
                         <Badge className={getDifficultyColor(question.metadata?.difficulty)}>
                           {question.metadata?.difficulty}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className={`font-medium ${getPerformanceColor(question.averageScore || 0)}`}>
-                            {question.averageScore?.toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {question.skipRate?.toFixed(1)}% skip
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <Users className="mr-1 h-3 w-3" />
-                          {question.totalAttempts}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <Clock className="mr-1 h-3 w-3" />
-                          {question.averageTime}s
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {question.createdAt}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setSelectedQuestion(question)}
-                          >
-                            <BarChart3 className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockQuestions.map((question) => (
-              <Card key={question.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        checked={selectedQuestions.includes(question.id)}
-                        onCheckedChange={() => handleQuestionSelect(question.id)}
-                      />
-                      <div className="flex items-center space-x-2">
-                        {getQuestionTypeIcon(question.subType)}
-                        <span className="font-medium text-gray-900">
-                          Q{question.questionNumber.toString().padStart(3, '0')}
-                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          {question.marks} marks
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleAnalyticsView(question.id)}
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setSelectedQuestion(question)}
-                      >
-                        <BarChart3 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-700 line-clamp-3">
-                      {question.text}
-                    </p>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <p className="text-sm mb-4 line-clamp-3">{question.text}</p>
                     
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {question.metadata?.subject}
-                      </Badge>
-                      <Badge className={getDifficultyColor(question.metadata?.difficulty)}>
-                        {question.metadata?.difficulty}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {question.marks} marks
-                      </Badge>
-                    </div>
-
-                    {question.subparts && (
-                      <div className="text-xs text-blue-600">
-                        {question.subparts.length} subparts
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
+                    {/* Performance Metrics */}
+                    <div className="grid grid-cols-4 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
                       <div className="text-center">
-                        <div className={`font-medium ${getPerformanceColor(question.averageScore || 0)}`}>
+                        <div className={`text-lg font-semibold ${getPerformanceColor(question.averageScore || 0)}`}>
                           {question.averageScore?.toFixed(1)}%
                         </div>
-                        <div>Avg. Score</div>
+                        <div className="text-xs text-gray-500">Avg Score</div>
                       </div>
                       <div className="text-center">
-                        <div className="font-medium">{question.totalAttempts}</div>
-                        <div>Attempts</div>
+                        <div className="text-lg font-semibold text-blue-600">
+                          {question.totalAttempts}
+                        </div>
+                        <div className="text-xs text-gray-500">Attempts</div>
                       </div>
                       <div className="text-center">
-                        <div className="font-medium">{question.averageTime}s</div>
-                        <div>Avg. Time</div>
+                        <div className="text-lg font-semibold text-purple-600">
+                          {question.averageTime}s
+                        </div>
+                        <div className="text-xs text-gray-500">Avg Time</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-green-600">
+                          {question.successRate?.toFixed(1)}%
+                        </div>
+                        <div className="text-xs text-gray-500">Success</div>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <span className="text-xs text-gray-500">
-                        Created {question.createdAt}
-                      </span>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
+                    {/* Metadata */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Subject:</span>
+                        <span>{question.metadata?.subject}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Grade:</span>
+                        <span>{question.metadata?.grade?.join(', ')}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Topics:</span>
+                        <span className="text-right">{question.metadata?.topic?.slice(0, 2).join(', ')}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Bloom's Level:</span>
+                        <Badge variant="outline" className="text-xs">
+                          {question.metadata?.bloomsLevel}
+                        </Badge>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                    {/* Tags */}
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {question.metadata?.tags?.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

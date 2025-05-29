@@ -532,9 +532,9 @@ const EnhancedCreateTestModal: React.FC<EnhancedCreateTestModalProps> = ({ isOpe
                           <SelectValue placeholder="All questions" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="high">High performing (>80%)</SelectItem>
+                          <SelectItem value="high">High performing ({'>'}80%)</SelectItem>
                           <SelectItem value="medium">Medium performing (60-80%)</SelectItem>
-                          <SelectItem value="low">Needs improvement (<60%)</SelectItem>
+                          <SelectItem value="low">Needs improvement ({'<'}60%)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
