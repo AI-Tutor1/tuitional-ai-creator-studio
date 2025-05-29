@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +31,6 @@ import {
   Target
 } from 'lucide-react';
 import { EnhancedQuestion } from '@/types/question';
-import AdvancedQuestionAnalytics from '@/components/question-bank/AdvancedQuestionAnalytics';
 
 const EnhancedQuestionBank: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,8 +47,6 @@ const EnhancedQuestionBank: React.FC = () => {
   });
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
   // Mock questions data with enhanced metadata
   const questions: EnhancedQuestion[] = [
@@ -212,20 +208,6 @@ const EnhancedQuestionBank: React.FC = () => {
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
-
-  const handleAnalyticsView = (questionId: string) => {
-    setSelectedQuestionId(questionId);
-    setShowAnalytics(true);
-  };
-
-  if (showAnalytics && selectedQuestionId) {
-    return (
-      <AdvancedQuestionAnalytics
-        questionId={selectedQuestionId}
-        onBack={() => setShowAnalytics(false)}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -441,12 +423,8 @@ const EnhancedQuestionBank: React.FC = () => {
                         </Badge>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleAnalyticsView(question.id)}
-                        >
-                          <BarChart3 className="h-4 w-4" />
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
                           <Edit className="h-4 w-4" />
