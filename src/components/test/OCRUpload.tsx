@@ -39,14 +39,20 @@ const OCRUpload: React.FC<OCRUploadProps> = ({ onTextExtracted, onClose }) => {
     try {
       const worker = await createWorker('eng');
       
-      const { data: { text } } = await worker.recognize(file, {
-        logger: (m: any) => {
-          if (m.status === 'recognizing text') {
-            setProgress(m.progress * 100);
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
           }
-        }
-      });
+          return prev + 10;
+        });
+      }, 500);
 
+      const { data: { text } } = await worker.recognize(file);
+
+      clearInterval(progressInterval);
       await worker.terminate();
       
       setExtractedText(text);
