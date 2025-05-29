@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
@@ -17,39 +16,26 @@ import {
   FileText, 
   Calculator,
   CheckSquare,
-  Move,
-  Upload
+  Upload,
+  Settings,
+  Link as LinkIcon
 } from 'lucide-react';
-
-interface Question {
-  id: string;
-  type: 'main-statement' | 'child-statement' | 'diagram' | 'question';
-  subType?: 'mcq' | 'short' | 'long' | 'numerical' | 'diagram' | 'equation';
-  text: string;
-  marks?: number;
-  markingScheme?: string;
-  markingSchemeImage?: string;
-  includeAnswer: boolean;
-  studentAnswer?: string;
-  includeDiagram: boolean;
-  diagram?: string;
-  mcqOptions?: Array<{
-    id: string;
-    text: string;
-    isCorrect: boolean;
-  }>;
-}
+import { EnhancedQuestion } from '@/types/question';
+import QuestionAssociationModal from './QuestionAssociationModal';
+import ImageUpload from './ImageUpload';
 
 interface QuestionBuilderProps {
-  questions: Question[];
-  onQuestionsChange: (questions: Question[]) => void;
+  questions: EnhancedQuestion[];
+  onQuestionsChange: (questions: EnhancedQuestion[]) => void;
 }
 
 const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestionsChange }) => {
   const [previewMode, setPreviewMode] = useState(false);
+  const [associationModalOpen, setAssociationModalOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
   const addQuestion = () => {
-    const newQuestion: Question = {
+    const newQuestion: EnhancedQuestion = {
       id: Date.now().toString(),
       type: 'question',
       subType: 'mcq',
@@ -62,14 +48,16 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
         { id: '2', text: '', isCorrect: false },
         { id: '3', text: '', isCorrect: false },
         { id: '4', text: '', isCorrect: false }
-      ]
+      ],
+      createdAt: new Date().toISOString(),
+      version: 1
     };
     onQuestionsChange([...questions, newQuestion]);
   };
 
-  const updateQuestion = (id: string, field: keyof Question, value: any) => {
+  const updateQuestion = (id: string, field: keyof EnhancedQuestion, value: any) => {
     const updatedQuestions = questions.map(q => 
-      q.id === id ? { ...q, [field]: value } : q
+      q.id === id ? { ...q, [field]: value, updatedAt: new Date().toISOString() } : q
     );
     onQuestionsChange(updatedQuestions);
   };
@@ -95,7 +83,6 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
     if (question && question.mcqOptions) {
       const updatedOptions = question.mcqOptions.map(opt => {
         if (opt.id === optionId) {
-          // If setting isCorrect to true, set all others to false
           if (field === 'isCorrect' && value === true) {
             question.mcqOptions?.forEach(o => o.isCorrect = false);
           }
@@ -113,6 +100,17 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
       const updatedOptions = question.mcqOptions.filter(opt => opt.id !== optionId);
       updateQuestion(questionId, 'mcqOptions', updatedOptions);
     }
+  };
+
+  const handleAssociationSave = (metadata: any) => {
+    if (selectedQuestionId) {
+      updateQuestion(selectedQuestionId, 'metadata', metadata);
+    }
+  };
+
+  const openAssociationModal = (questionId: string) => {
+    setSelectedQuestionId(questionId);
+    setAssociationModalOpen(true);
   };
 
   const getTotalMarks = () => {
@@ -226,15 +224,60 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                       )}
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeQuestion(question.id)}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex space-x-2">
+                      {question.type === 'question' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openAssociationModal(question.id)}
+                          className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeQuestion(question.id)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
+
+                  {/* Metadata Display */}
+                  {question.metadata && (
+                    <div className="mt-3 p-3 bg-[#2A2A2A] rounded-lg">
+                      <div className="flex flex-wrap gap-1">
+                        {question.metadata.subject && (
+                          <Badge variant="secondary" className="bg-blue-600 text-white text-xs">
+                            {question.metadata.subject}
+                          </Badge>
+                        )}
+                        {question.metadata.grade?.map((grade, i) => (
+                          <Badge key={i} variant="secondary" className="bg-green-600 text-white text-xs">
+                            {grade}
+                          </Badge>
+                        ))}
+                        {question.metadata.difficulty && (
+                          <Badge variant="secondary" className="bg-orange-600 text-white text-xs">
+                            {question.metadata.difficulty}
+                          </Badge>
+                        )}
+                        {question.metadata.tags?.slice(0, 3).map((tag, i) => (
+                          <Badge key={i} variant="secondary" className="bg-purple-600 text-white text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {question.metadata.tags && question.metadata.tags.length > 3 && (
+                          <Badge variant="secondary" className="bg-gray-600 text-white text-xs">
+                            +{question.metadata.tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -255,50 +298,62 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                   {question.type === 'diagram' && (
                     <div>
                       <Label className="text-white mb-2 block">Upload Diagram</Label>
-                      <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
-                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                        <p className="text-gray-400 text-sm">Click to upload or drag and drop</p>
-                        <p className="text-gray-500 text-xs">PNG, JPG, SVG up to 5MB</p>
-                      </div>
+                      <ImageUpload
+                        onImageUpload={(imageData) => updateQuestion(question.id, 'diagram', imageData.url)}
+                        currentImage={question.diagram ? { url: question.diagram, alt: 'Diagram' } : undefined}
+                        onRemoveImage={() => updateQuestion(question.id, 'diagram', undefined)}
+                      />
                     </div>
                   )}
 
-                  {/* MCQ Options */}
+                  {/* MCQ Options with Image Upload */}
                   {question.type === 'question' && question.subType === 'mcq' && (
                     <div>
                       <Label className="text-white mb-2 block">Answer Options</Label>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {question.mcqOptions?.map((option, optIndex) => (
-                          <div key={option.id} className="flex items-start space-x-3">
-                            <div className="flex items-center space-x-2 mt-2">
-                              <input
-                                type="radio"
-                                name={`correct-${question.id}`}
-                                checked={option.isCorrect}
-                                onChange={() => updateMCQOption(question.id, option.id, 'isCorrect', true)}
-                                className="text-[#38B6FF]"
+                          <div key={option.id} className="border border-gray-600 rounded-lg p-4">
+                            <div className="flex items-start space-x-3 mb-3">
+                              <div className="flex items-center space-x-2 mt-2">
+                                <input
+                                  type="radio"
+                                  name={`correct-${question.id}`}
+                                  checked={option.isCorrect}
+                                  onChange={() => updateMCQOption(question.id, option.id, 'isCorrect', true)}
+                                  className="text-[#38B6FF]"
+                                />
+                                <Badge variant="secondary" className="text-xs">
+                                  {String.fromCharCode(65 + optIndex)}
+                                </Badge>
+                              </div>
+                              <Textarea
+                                value={option.text}
+                                onChange={(e) => updateMCQOption(question.id, option.id, 'text', e.target.value)}
+                                placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
+                                className="flex-1 bg-[#2A2A2A] border-gray-600 text-white"
+                                rows={2}
                               />
-                              <Badge variant="secondary" className="text-xs">
-                                {String.fromCharCode(65 + optIndex)}
-                              </Badge>
+                              {question.mcqOptions && question.mcqOptions.length > 2 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeMCQOption(question.id, option.id)}
+                                  className="text-red-400 hover:text-red-300 mt-1"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
-                            <Textarea
-                              value={option.text}
-                              onChange={(e) => updateMCQOption(question.id, option.id, 'text', e.target.value)}
-                              placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                              className="flex-1 bg-[#2A2A2A] border-gray-600 text-white"
-                              rows={2}
-                            />
-                            {question.mcqOptions && question.mcqOptions.length > 2 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeMCQOption(question.id, option.id)}
-                                className="text-red-400 hover:text-red-300 mt-1"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
+                            
+                            {/* Image Upload for MCQ Option */}
+                            <div>
+                              <Label className="text-white text-sm mb-2 block">Option Image (optional)</Label>
+                              <ImageUpload
+                                onImageUpload={(imageData) => updateMCQOption(question.id, option.id, 'image', imageData)}
+                                currentImage={option.image}
+                                onRemoveImage={() => updateMCQOption(question.id, option.id, 'image', undefined)}
+                              />
+                            </div>
                           </div>
                         ))}
                         <Button
@@ -411,11 +466,18 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                     <span className="text-sm text-gray-300">
                       Q{index + 1}: {question.type}
                     </span>
-                    {question.marks && (
-                      <Badge variant="secondary" className="text-xs">
-                        {question.marks}m
-                      </Badge>
-                    )}
+                    <div className="flex space-x-1">
+                      {question.marks && (
+                        <Badge variant="secondary" className="text-xs">
+                          {question.marks}m
+                        </Badge>
+                      )}
+                      {question.metadata && (
+                        <Badge variant="secondary" className="text-xs bg-[#38B6FF]">
+                          ✓
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -423,6 +485,17 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
           </CardContent>
         </Card>
       </div>
+
+      {/* Question Association Modal */}
+      <QuestionAssociationModal
+        isOpen={associationModalOpen}
+        onClose={() => {
+          setAssociationModalOpen(false);
+          setSelectedQuestionId(null);
+        }}
+        onSave={handleAssociationSave}
+        initialMetadata={selectedQuestionId ? questions.find(q => q.id === selectedQuestionId)?.metadata : undefined}
+      />
     </div>
   );
 };

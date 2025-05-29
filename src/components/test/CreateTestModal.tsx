@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,12 +13,12 @@ import {
   ChevronRight, 
   Save, 
   Eye, 
-  Plus,
   Settings,
   FileText,
   Target
 } from 'lucide-react';
 import QuestionBuilder from '@/components/test/QuestionBuilder';
+import { EnhancedQuestion } from '@/types/question';
 
 interface CreateTestModalProps {
   isOpen: boolean;
@@ -38,7 +37,7 @@ interface TestData {
   difficulty: string;
   tags: string[];
   description: string;
-  questions: any[];
+  questions: EnhancedQuestion[];
 }
 
 const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) => {
