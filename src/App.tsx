@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import Index from "./pages/Index";
 import TestLibrary from "./pages/TestLibrary";
+import QuestionBank from "./pages/QuestionBank";
 import StudentTests from "./pages/StudentTests";
 import NotFound from "./pages/NotFound";
 
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/tests" element={<TestLibrary />} />
+          <Route path="/questions" element={<QuestionBank />} />
           <Route path="/student-tests" element={<StudentTests />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
