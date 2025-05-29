@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +13,10 @@ import {
   X,
   Plus,
   Minus,
-  FileText
+  FileText,
+  Scan
 } from 'lucide-react';
+import TeacherOCR from './TeacherOCR';
 
 interface MathTextEditorProps {
   value: string;
@@ -33,6 +34,7 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [history, setHistory] = useState<string[]>([value]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
 
   const insertSymbol = (symbol: string) => {
     const textarea = textareaRef.current;
@@ -95,6 +97,12 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
     addToHistory(newValue);
   };
 
+  const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'append') => {
+    const newValue = insertMode === 'replace' ? text : `${value}\n${text}`;
+    onChange(newValue);
+    addToHistory(newValue);
+  };
+
   const mathSymbols = [
     { symbol: '×', label: 'Multiply' },
     { symbol: '÷', label: 'Divide' },
@@ -119,120 +127,143 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
   ];
 
   return (
-    <Card className="w-full bg-[#2A2A2A] border-gray-700">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-white text-lg">Math Text Editor</CardTitle>
-          {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4 text-gray-400" />
+    <>
+      <Card className="w-full bg-[#2A2A2A] border-gray-700">
+        <CardHeader className="pb-3">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-white text-lg">Math Text Editor</CardTitle>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOcrModalOpen(true)}
+                className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
+              >
+                <Scan className="h-4 w-4 mr-1" />
+                OCR
+              </Button>
+              {onClose && (
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  <X className="h-4 w-4 text-gray-400" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Formatting Toolbar */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => formatText('bold')}
+              className="border-gray-600 text-gray-300"
+            >
+              <Bold className="h-4 w-4" />
             </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Formatting Toolbar */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => formatText('bold')}
-            className="border-gray-600 text-gray-300"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => formatText('italic')}
-            className="border-gray-600 text-gray-300"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => formatText('subscript')}
-            className="border-gray-600 text-gray-300"
-          >
-            <Subscript className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => formatText('superscript')}
-            className="border-gray-600 text-gray-300"
-          >
-            <Superscript className="h-4 w-4" />
-          </Button>
-          <Separator orientation="vertical" className="h-8" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={undo}
-            disabled={historyIndex <= 0}
-            className="border-gray-600 text-gray-300"
-          >
-            <Undo className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Math Symbols */}
-        <div className="space-y-3">
-          <h4 className="text-white text-sm font-medium">Mathematical Symbols</h4>
-          <div className="grid grid-cols-8 gap-1">
-            {mathSymbols.map((item) => (
-              <Button
-                key={item.symbol}
-                variant="outline"
-                size="sm"
-                onClick={() => insertSymbol(item.symbol)}
-                className="border-gray-600 text-gray-300 h-8 w-8 p-0"
-                title={item.label}
-              >
-                {item.symbol}
-              </Button>
-            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => formatText('italic')}
+              className="border-gray-600 text-gray-300"
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => formatText('subscript')}
+              className="border-gray-600 text-gray-300"
+            >
+              <Subscript className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => formatText('superscript')}
+              className="border-gray-600 text-gray-300"
+            >
+              <Superscript className="h-4 w-4" />
+            </Button>
+            <Separator orientation="vertical" className="h-8" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={undo}
+              disabled={historyIndex <= 0}
+              className="border-gray-600 text-gray-300"
+            >
+              <Undo className="h-4 w-4" />
+            </Button>
           </div>
-        </div>
 
-        {/* Common Fractions */}
-        <div className="space-y-3">
-          <h4 className="text-white text-sm font-medium">Common Fractions</h4>
-          <div className="flex flex-wrap gap-1">
-            {fractions.map((fraction) => (
-              <Button
-                key={fraction}
-                variant="outline"
-                size="sm"
-                onClick={() => insertSymbol(fraction)}
-                className="border-gray-600 text-gray-300 h-8 px-2"
-              >
-                {fraction}
-              </Button>
-            ))}
+          {/* Math Symbols */}
+          <div className="space-y-3">
+            <h4 className="text-white text-sm font-medium">Mathematical Symbols</h4>
+            <div className="grid grid-cols-8 gap-1">
+              {mathSymbols.map((item) => (
+                <Button
+                  key={item.symbol}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertSymbol(item.symbol)}
+                  className="border-gray-600 text-gray-300 h-8 w-8 p-0"
+                  title={item.label}
+                >
+                  {item.symbol}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Text Area */}
-        <Textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value);
-            addToHistory(e.target.value);
-          }}
-          placeholder={placeholder}
-          className="bg-[#1E1E1E] border-gray-600 text-white min-h-[150px] font-mono"
+          {/* Common Fractions */}
+          <div className="space-y-3">
+            <h4 className="text-white text-sm font-medium">Common Fractions</h4>
+            <div className="flex flex-wrap gap-1">
+              {fractions.map((fraction) => (
+                <Button
+                  key={fraction}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertSymbol(fraction)}
+                  className="border-gray-600 text-gray-300 h-8 px-2"
+                >
+                  {fraction}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Text Area */}
+          <Textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => {
+              onChange(e.target.value);
+              addToHistory(e.target.value);
+            }}
+            placeholder={placeholder}
+            className="bg-[#1E1E1E] border-gray-600 text-white min-h-[150px] font-mono"
+          />
+
+          {/* Character Count */}
+          <div className="flex justify-between text-sm text-gray-400">
+            <span>Use LaTeX notation for complex expressions: \\frac&#123;1&#125;&#123;2&#125;, \\sqrt&#123;5&#125;, y^2</span>
+            <span>{value.length} characters</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* OCR Modal */}
+      {ocrModalOpen && (
+        <TeacherOCR
+          onTextExtracted={handleOCRText}
+          onClose={() => setOcrModalOpen(false)}
+          title="Extract Mathematical Text"
+          placeholder="Upload an image containing mathematical expressions, formulas, or equations..."
         />
-
-        {/* Character Count */}
-        <div className="flex justify-between text-sm text-gray-400">
-          <span>Use LaTeX notation for complex expressions: \\frac&#123;1&#125;&#123;2&#125;, \\sqrt&#123;5&#125;, y^2</span>
-          <span>{value.length} characters</span>
-        </div>
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 };
 

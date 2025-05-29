@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +16,11 @@ import {
   FileText,
   Clock,
   Target,
-  BookOpen
+  BookOpen,
+  Scan
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import TeacherOCR from './TeacherOCR';
 
 interface Question {
   id: string;
@@ -56,6 +57,12 @@ const TestEditModal: React.FC<TestEditModalProps> = ({ test, onClose, onSave }) 
     id: `${test.id}_v${test.version + 1}` // Create new version ID
   });
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
+  const [ocrTarget, setOcrTarget] = useState<{
+    questionId: string;
+    field: 'question' | 'option';
+    optionIndex?: number;
+  } | null>(null);
 
   const updateTestField = (field: keyof Test, value: any) => {
     setEditedTest(prev => ({
@@ -127,6 +134,34 @@ const TestEditModal: React.FC<TestEditModalProps> = ({ test, onClose, onSave }) 
       title: "Question Duplicated",
       description: "A copy of the question has been added to the test.",
     });
+  };
+
+  const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'replace') => {
+    if (!ocrTarget) return;
+
+    const { questionId, field, optionIndex } = ocrTarget;
+    const question = editedTest.questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    if (field === 'question') {
+      const newText = insertMode === 'append' ? `${question.question}\n${text}` : text;
+      updateQuestion(questionId, { question: newText });
+    } else if (field === 'option' && optionIndex !== undefined && question.options) {
+      const newOptions = [...question.options];
+      const currentText = newOptions[optionIndex] || '';
+      newOptions[optionIndex] = insertMode === 'append' ? `${currentText}\n${text}` : text;
+      updateQuestion(questionId, { options: newOptions });
+    }
+  };
+
+  const openOCRModal = (questionId: string, field: 'question' | 'option', optionIndex?: number) => {
+    setOcrTarget({ questionId, field, optionIndex });
+    setOcrModalOpen(true);
+  };
+
+  const closeOCRModal = () => {
+    setOcrModalOpen(false);
+    setOcrTarget(null);
   };
 
   const handleSave = () => {
@@ -296,12 +331,26 @@ const TestEditModal: React.FC<TestEditModalProps> = ({ test, onClose, onSave }) 
 
                       {editingQuestionId === question.id ? (
                         <div className="space-y-3">
-                          <Textarea
-                            value={question.question}
-                            onChange={(e) => updateQuestion(question.id, { question: e.target.value })}
-                            className="bg-[#2A2A2A] border-gray-600 text-white"
-                            rows={2}
-                          />
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <Label className="text-white text-sm">Question Text</Label>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openOCRModal(question.id, 'question')}
+                                className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white text-xs px-2 py-1"
+                              >
+                                <Scan className="h-3 w-3 mr-1" />
+                                OCR
+                              </Button>
+                            </div>
+                            <Textarea
+                              value={question.question}
+                              onChange={(e) => updateQuestion(question.id, { question: e.target.value })}
+                              className="bg-[#2A2A2A] border-gray-600 text-white"
+                              rows={2}
+                            />
+                          </div>
                           <div className="grid grid-cols-2 gap-2">
                             <Input
                               type="number"
@@ -324,17 +373,26 @@ const TestEditModal: React.FC<TestEditModalProps> = ({ test, onClose, onSave }) 
                             <div className="space-y-2">
                               <Label className="text-white text-sm">Options</Label>
                               {question.options?.map((option, optIndex) => (
-                                <Input
-                                  key={optIndex}
-                                  value={option}
-                                  onChange={(e) => {
-                                    const newOptions = [...(question.options || [])];
-                                    newOptions[optIndex] = e.target.value;
-                                    updateQuestion(question.id, { options: newOptions });
-                                  }}
-                                  className="bg-[#2A2A2A] border-gray-600 text-white"
-                                  placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                                />
+                                <div key={optIndex} className="flex items-center space-x-2">
+                                  <Input
+                                    value={option}
+                                    onChange={(e) => {
+                                      const newOptions = [...(question.options || [])];
+                                      newOptions[optIndex] = e.target.value;
+                                      updateQuestion(question.id, { options: newOptions });
+                                    }}
+                                    className="flex-1 bg-[#2A2A2A] border-gray-600 text-white"
+                                    placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
+                                  />
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openOCRModal(question.id, 'option', optIndex)}
+                                    className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white text-xs px-2 py-1"
+                                  >
+                                    <Scan className="h-3 w-3" />
+                                  </Button>
+                                </div>
                               ))}
                             </div>
                           )}
@@ -371,6 +429,20 @@ const TestEditModal: React.FC<TestEditModalProps> = ({ test, onClose, onSave }) 
           </Button>
         </div>
       </Card>
+
+      {/* OCR Modal */}
+      {ocrModalOpen && ocrTarget && (
+        <TeacherOCR
+          onTextExtracted={handleOCRText}
+          onClose={closeOCRModal}
+          title={ocrTarget.field === 'question' ? "Extract Question Text" : "Extract Option Text"}
+          placeholder={
+            ocrTarget.field === 'question' 
+              ? "Upload an image containing the question text..."
+              : "Upload an image containing the answer option text..."
+          }
+        />
+      )}
     </div>
   );
 };

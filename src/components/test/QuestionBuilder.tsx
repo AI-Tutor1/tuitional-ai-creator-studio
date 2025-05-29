@@ -17,11 +17,13 @@ import {
   CheckSquare,
   Upload,
   Settings,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Scan
 } from 'lucide-react';
 import { EnhancedQuestion } from '@/types/question';
 import QuestionAssociationModal from './QuestionAssociationModal';
 import ImageUpload from './ImageUpload';
+import TeacherOCR from './TeacherOCR';
 
 interface QuestionBuilderProps {
   questions: EnhancedQuestion[];
@@ -32,6 +34,12 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
   const [previewMode, setPreviewMode] = useState(false);
   const [associationModalOpen, setAssociationModalOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
+  const [ocrTarget, setOcrTarget] = useState<{
+    questionId: string;
+    field: 'text' | 'option';
+    optionId?: string;
+  } | null>(null);
 
   const addQuestion = () => {
     const questionCount = questions.filter(q => q.type === 'question').length;
@@ -122,6 +130,35 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
 
   const getQuestionCount = () => {
     return questions.filter(q => q.type === 'question').length;
+  };
+
+  const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'replace') => {
+    if (!ocrTarget) return;
+
+    const { questionId, field, optionId } = ocrTarget;
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    if (field === 'text') {
+      const newText = insertMode === 'append' ? `${question.text}\n${text}` : text;
+      updateQuestion(questionId, 'text', newText);
+    } else if (field === 'option' && optionId && question.mcqOptions) {
+      const option = question.mcqOptions.find(opt => opt.id === optionId);
+      if (option) {
+        const newText = insertMode === 'append' ? `${option.text}\n${text}` : text;
+        updateMCQOption(questionId, optionId, 'text', newText);
+      }
+    }
+  };
+
+  const openOCRModal = (questionId: string, field: 'text' | 'option', optionId?: string) => {
+    setOcrTarget({ questionId, field, optionId });
+    setOcrModalOpen(true);
+  };
+
+  const closeOCRModal = () => {
+    setOcrModalOpen(false);
+    setOcrTarget(null);
   };
 
   return (
@@ -293,9 +330,20 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                 <CardContent className="space-y-4">
                   {/* Question Text */}
                   <div>
-                    <Label className="text-white mb-2 block">
-                      {question.type === 'question' ? 'Question Text' : 'Text Content'}
-                    </Label>
+                    <div className="flex justify-between items-center mb-2">
+                      <Label className="text-white">
+                        {question.type === 'question' ? 'Question Text' : 'Text Content'}
+                      </Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openOCRModal(question.id, 'text')}
+                        className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
+                      >
+                        <Scan className="h-4 w-4 mr-1" />
+                        OCR
+                      </Button>
+                    </div>
                     <Textarea
                       value={question.text}
                       onChange={(e) => updateQuestion(question.id, 'text', e.target.value)}
@@ -316,7 +364,7 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                     </div>
                   )}
 
-                  {/* MCQ Options with Image Upload */}
+                  {/* MCQ Options with OCR */}
                   {question.type === 'question' && question.subType === 'mcq' && (
                     <div>
                       <Label className="text-white mb-2 block">Answer Options</Label>
@@ -336,13 +384,27 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                                   {String.fromCharCode(65 + optIndex)}
                                 </Badge>
                               </div>
-                              <Textarea
-                                value={option.text}
-                                onChange={(e) => updateMCQOption(question.id, option.id, 'text', e.target.value)}
-                                placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                                className="flex-1 bg-[#2A2A2A] border-gray-600 text-white"
-                                rows={2}
-                              />
+                              <div className="flex-1">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-gray-300 text-sm">Option {String.fromCharCode(65 + optIndex)}</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openOCRModal(question.id, 'option', option.id)}
+                                    className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white text-xs px-2 py-1"
+                                  >
+                                    <Scan className="h-3 w-3 mr-1" />
+                                    OCR
+                                  </Button>
+                                </div>
+                                <Textarea
+                                  value={option.text}
+                                  onChange={(e) => updateMCQOption(question.id, option.id, 'text', e.target.value)}
+                                  placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
+                                  className="bg-[#2A2A2A] border-gray-600 text-white"
+                                  rows={2}
+                                />
+                              </div>
                               {question.mcqOptions && question.mcqOptions.length > 2 && (
                                 <Button
                                   variant="ghost"
@@ -599,6 +661,20 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
         onSave={handleAssociationSave}
         initialMetadata={selectedQuestionId ? questions.find(q => q.id === selectedQuestionId)?.metadata : undefined}
       />
+
+      {/* OCR Modal */}
+      {ocrModalOpen && ocrTarget && (
+        <TeacherOCR
+          onTextExtracted={handleOCRText}
+          onClose={closeOCRModal}
+          title={ocrTarget.field === 'text' ? "Extract Question Text" : "Extract Option Text"}
+          placeholder={
+            ocrTarget.field === 'text' 
+              ? "Upload an image containing the question text..."
+              : "Upload an image containing the answer option text..."
+          }
+        />
+      )}
     </div>
   );
 };
