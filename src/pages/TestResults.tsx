@@ -311,10 +311,12 @@ const TestResults = () => {
               Back to Test Bank
             </Button>
           </Link>
-          <Button className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
-            <BarChart3 className="mr-2 h-4 w-4" />
-            View Performance Trends
-          </Button>
+          <Link to="/performance-trends/student-123">
+            <Button className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              View Performance Trends
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

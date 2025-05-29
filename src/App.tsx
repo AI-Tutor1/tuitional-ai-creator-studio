@@ -10,6 +10,7 @@ import TeacherTestBank from './pages/TeacherTestBank';
 import StudentTestBank from './pages/StudentTestBank';
 import TestTaking from './pages/TestTaking';
 import TestResults from './pages/TestResults';
+import PerformanceTrends from './pages/PerformanceTrends';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/student-test-bank" element={<StudentTestBank />} />
         <Route path="/test-taking/:testId" element={<TestTaking />} />
         <Route path="/test-results/:testId" element={<TestResults />} />
+        <Route path="/performance-trends/:studentId" element={<PerformanceTrends />} />
         <Route path="/questions" element={<EnhancedQuestionBank />} />
         <Route path="/questions/legacy" element={<QuestionBank />} />
         <Route path="/student-tests" element={<StudentTests />} />
