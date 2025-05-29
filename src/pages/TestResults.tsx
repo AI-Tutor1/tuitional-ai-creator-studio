@@ -311,10 +311,22 @@ const TestResults = () => {
               Back to Test Bank
             </Button>
           </Link>
-          <Link to="/performance-trends/student-123">
+          <Link to={`/test-performance/${testId}/student/student-123`}>
             <Button className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
+              <Target className="mr-2 h-4 w-4" />
+              Detailed Performance Analysis
+            </Button>
+          </Link>
+          <Link to="/performance-trends/student-123">
+            <Button variant="outline" className="border-purple-600 text-purple-300 hover:bg-purple-700">
               <BarChart3 className="mr-2 h-4 w-4" />
-              View Performance Trends
+              Long-term Trends
+            </Button>
+          </Link>
+          <Link to={`/test-performance/${testId}/teacher`}>
+            <Button variant="outline" className="border-yellow-600 text-yellow-300 hover:bg-yellow-700">
+              <Award className="mr-2 h-4 w-4" />
+              Teacher Analytics
             </Button>
           </Link>
         </div>
