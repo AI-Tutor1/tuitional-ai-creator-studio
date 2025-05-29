@@ -228,7 +228,7 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
 
         {/* Character Count */}
         <div className="flex justify-between text-sm text-gray-400">
-          <span>Use LaTeX notation for complex expressions: \\frac{a}{b}, \\sqrt{x}, x^2</span>
+          <span>Use LaTeX notation for complex expressions: \\frac&#123;1&#125;&#123;2&#125;, \\sqrt&#123;5&#125;, y^2</span>
           <span>{value.length} characters</span>
         </div>
       </CardContent>

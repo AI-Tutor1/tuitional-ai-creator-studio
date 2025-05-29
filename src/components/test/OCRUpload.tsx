@@ -37,18 +37,10 @@ const OCRUpload: React.FC<OCRUploadProps> = ({ onTextExtracted, onClose }) => {
     setProgress(0);
 
     try {
-      const worker = await createWorker();
+      const worker = await createWorker('eng');
       
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      
-      // Set progress callback
-      await worker.setParameters({
-        tessedit_pageseg_mode: '6', // Uniform block of text
-      });
-
       const { data: { text } } = await worker.recognize(file, {
-        logger: (m) => {
+        logger: (m: any) => {
           if (m.status === 'recognizing text') {
             setProgress(m.progress * 100);
           }
