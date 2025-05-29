@@ -6,6 +6,10 @@ import TestLibrary from './pages/TestLibrary';
 import QuestionBank from './pages/QuestionBank';
 import EnhancedQuestionBank from './pages/EnhancedQuestionBank';
 import StudentTests from './pages/StudentTests';
+import TeacherTestBank from './pages/TeacherTestBank';
+import StudentTestBank from './pages/StudentTestBank';
+import TestTaking from './pages/TestTaking';
+import TestResults from './pages/TestResults';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -14,6 +18,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/tests" element={<TestLibrary />} />
+        <Route path="/teacher-test-bank" element={<TeacherTestBank />} />
+        <Route path="/student-test-bank" element={<StudentTestBank />} />
+        <Route path="/test-taking/:testId" element={<TestTaking />} />
+        <Route path="/test-results/:testId" element={<TestResults />} />
         <Route path="/questions" element={<EnhancedQuestionBank />} />
         <Route path="/questions/legacy" element={<QuestionBank />} />
         <Route path="/student-tests" element={<StudentTests />} />

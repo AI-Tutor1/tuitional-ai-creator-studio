@@ -41,6 +41,16 @@ const Navigation = () => {
                   Test Library
                 </Link>
                 <Link 
+                  to="/teacher-test-bank" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive('/teacher-test-bank') 
+                      ? 'text-[#38B6FF] bg-[#38B6FF]/10' 
+                      : 'text-gray-300 hover:text-[#38B6FF]'
+                  }`}
+                >
+                  Test Bank
+                </Link>
+                <Link 
                   to="/questions" 
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive('/questions') 
@@ -50,9 +60,6 @@ const Navigation = () => {
                 >
                   Question Bank
                 </Link>
-                <a href="#" className="text-gray-300 hover:text-[#38B6FF] px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  Analytics
-                </a>
               </div>
             </div>
           </div>
