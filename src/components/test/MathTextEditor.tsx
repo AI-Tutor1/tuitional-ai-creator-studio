@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Scan } from 'lucide-react';
 import MathSymbolPalette from './MathSymbolPalette';
 import MathFormattingToolbar from './MathFormattingToolbar';
-import MathEditorCore from './MathEditorCore';
+import MathEditorCore, { MathEditorRef } from './MathEditorCore';
 import TeacherOCR from './TeacherOCR';
 
 interface MathTextEditorProps {
@@ -24,6 +24,7 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
   const [history, setHistory] = useState<string[]>([value]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
+  const editorRef = useRef<MathEditorRef>(null);
 
   const addToHistory = (newValue: string) => {
     const newHistory = history.slice(0, historyIndex + 1);
@@ -45,12 +46,13 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
     addToHistory(newValue);
   };
 
-  const editorCore = MathEditorCore({
-    value,
-    onChange,
-    placeholder,
-    onHistoryAdd: addToHistory
-  });
+  const handleSymbolInsert = (symbol: string) => {
+    editorRef.current?.insertSymbol(symbol);
+  };
+
+  const handleFormat = (format: string) => {
+    editorRef.current?.formatText(format);
+  };
 
   return (
     <>
@@ -79,16 +81,22 @@ const MathTextEditor: React.FC<MathTextEditorProps> = ({
         <CardContent className="space-y-4">
           {/* Formatting Toolbar */}
           <MathFormattingToolbar
-            onFormat={editorCore.formatText}
+            onFormat={handleFormat}
             onUndo={undo}
             canUndo={historyIndex > 0}
           />
 
           {/* Math Symbols */}
-          <MathSymbolPalette onSymbolInsert={editorCore.insertSymbol} />
+          <MathSymbolPalette onSymbolInsert={handleSymbolInsert} />
 
           {/* Text Area */}
-          {editorCore.textarea}
+          <MathEditorCore
+            ref={editorRef}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            onHistoryAdd={addToHistory}
+          />
 
           {/* Character Count */}
           <div className="flex justify-between text-sm text-gray-400">

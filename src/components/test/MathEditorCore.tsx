@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, forwardRef, useImperativeHandle } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
 interface MathEditorCoreProps {
@@ -9,12 +9,17 @@ interface MathEditorCoreProps {
   onHistoryAdd: (value: string) => void;
 }
 
-const MathEditorCore: React.FC<MathEditorCoreProps> = ({
+export interface MathEditorRef {
+  insertSymbol: (symbol: string) => void;
+  formatText: (format: string) => void;
+}
+
+const MathEditorCore = forwardRef<MathEditorRef, MathEditorCoreProps>(({
   value,
   onChange,
   placeholder = "Type your answer here...",
   onHistoryAdd
-}) => {
+}, ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -70,19 +75,22 @@ const MathEditorCore: React.FC<MathEditorCoreProps> = ({
     onHistoryAdd(newValue);
   };
 
-  return {
-    textarea: (
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className="bg-[#1E1E1E] border-gray-600 text-white min-h-[150px] font-mono"
-      />
-    ),
+  useImperativeHandle(ref, () => ({
     insertSymbol,
     formatText
-  };
-};
+  }));
+
+  return (
+    <Textarea
+      ref={textareaRef}
+      value={value}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className="bg-[#1E1E1E] border-gray-600 text-white min-h-[150px] font-mono"
+    />
+  );
+});
+
+MathEditorCore.displayName = 'MathEditorCore';
 
 export default MathEditorCore;

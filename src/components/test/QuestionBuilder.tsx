@@ -1,29 +1,23 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
-  Trash2, 
-  Image, 
   Eye, 
   FileText, 
-  Calculator,
-  CheckSquare,
-  Upload,
-  Settings,
-  Link as LinkIcon,
   Scan
 } from 'lucide-react';
 import { EnhancedQuestion } from '@/types/question';
 import QuestionAssociationModal from './QuestionAssociationModal';
 import ImageUpload from './ImageUpload';
 import TeacherOCR from './TeacherOCR';
+import QuestionHeader from './QuestionHeader';
+import MCQOptionsEditor from './MCQOptionsEditor';
+import QuestionSubparts from './QuestionSubparts';
+import TestOverviewSidebar from './TestOverviewSidebar';
 
 interface QuestionBuilderProps {
   questions: EnhancedQuestion[];
@@ -122,16 +116,6 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
     setAssociationModalOpen(true);
   };
 
-  const getTotalMarks = () => {
-    return questions
-      .filter(q => q.type === 'question')
-      .reduce((total, q) => total + (q.marks || 0), 0);
-  };
-
-  const getQuestionCount = () => {
-    return questions.filter(q => q.type === 'question').length;
-  };
-
   const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'replace') => {
     if (!ocrTarget) return;
 
@@ -207,124 +191,12 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
             {questions.map((question, index) => (
               <Card key={question.id} className="bg-[#1E1E1E] border-gray-700">
                 <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex space-x-4 flex-1">
-                      <div className="flex-1">
-                        <Label className="text-white mb-2 block">Statement Type</Label>
-                        <Select 
-                          value={question.type} 
-                          onValueChange={(value) => updateQuestion(question.id, 'type', value)}
-                        >
-                          <SelectTrigger className="bg-[#2A2A2A] border-gray-600 text-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                            <SelectItem value="main-statement">Main Statement</SelectItem>
-                            <SelectItem value="child-statement">Child Statement</SelectItem>
-                            <SelectItem value="diagram">Diagram</SelectItem>
-                            <SelectItem value="question">Question</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {question.type === 'question' && (
-                        <div className="flex-1">
-                          <Label className="text-white mb-2 block">Question Type</Label>
-                          <Select 
-                            value={question.subType || ''} 
-                            onValueChange={(value) => updateQuestion(question.id, 'subType', value)}
-                          >
-                            <SelectTrigger className="bg-[#2A2A2A] border-gray-600 text-white">
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                              <SelectItem value="mcq">Multiple Choice</SelectItem>
-                              <SelectItem value="short">Short Answer</SelectItem>
-                              <SelectItem value="long">Long Answer</SelectItem>
-                              <SelectItem value="numerical">Numerical</SelectItem>
-                              <SelectItem value="diagram">Diagram</SelectItem>
-                              <SelectItem value="equation">Equation</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {question.type === 'question' && (
-                        <div className="w-24">
-                          <Label className="text-white mb-2 block">Marks</Label>
-                          <Input
-                            type="number"
-                            value={question.marks || ''}
-                            onChange={(e) => updateQuestion(question.id, 'marks', parseInt(e.target.value) || 0)}
-                            className="bg-[#2A2A2A] border-gray-600 text-white"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex space-x-2">
-                      {question.type === 'question' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openAssociationModal(question.id)}
-                          className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
-                        >
-                          <LinkIcon className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeQuestion(question.id)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Question Number Display */}
-                  {question.type === 'question' && (
-                    <div className="mt-2">
-                      <Badge variant="secondary" className="bg-[#38B6FF] text-white">
-                        Question {question.questionNumber}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Metadata Display */}
-                  {question.metadata && (
-                    <div className="mt-3 p-3 bg-[#2A2A2A] rounded-lg">
-                      <div className="flex flex-wrap gap-1">
-                        {question.metadata.subject && (
-                          <Badge variant="secondary" className="bg-blue-600 text-white text-xs">
-                            {question.metadata.subject}
-                          </Badge>
-                        )}
-                        {question.metadata.grade?.map((grade, i) => (
-                          <Badge key={i} variant="secondary" className="bg-green-600 text-white text-xs">
-                            {grade}
-                          </Badge>
-                        ))}
-                        {question.metadata.difficulty && (
-                          <Badge variant="secondary" className="bg-orange-600 text-white text-xs">
-                            {question.metadata.difficulty}
-                          </Badge>
-                        )}
-                        {question.metadata.tags?.slice(0, 3).map((tag, i) => (
-                          <Badge key={i} variant="secondary" className="bg-purple-600 text-white text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {question.metadata.tags && question.metadata.tags.length > 3 && (
-                          <Badge variant="secondary" className="bg-gray-600 text-white text-xs">
-                            +{question.metadata.tags.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  <QuestionHeader
+                    question={question}
+                    onUpdate={(field, value) => updateQuestion(question.id, field, value)}
+                    onRemove={() => removeQuestion(question.id)}
+                    onOpenAssociation={() => openAssociationModal(question.id)}
+                  />
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -364,179 +236,24 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                     </div>
                   )}
 
-                  {/* MCQ Options with OCR */}
-                  {question.type === 'question' && question.subType === 'mcq' && (
-                    <div>
-                      <Label className="text-white mb-2 block">Answer Options</Label>
-                      <div className="space-y-4">
-                        {question.mcqOptions?.map((option, optIndex) => (
-                          <div key={option.id} className="border border-gray-600 rounded-lg p-4">
-                            <div className="flex items-start space-x-3 mb-3">
-                              <div className="flex items-center space-x-2 mt-2">
-                                <input
-                                  type="radio"
-                                  name={`correct-${question.id}`}
-                                  checked={option.isCorrect}
-                                  onChange={() => updateMCQOption(question.id, option.id, 'isCorrect', true)}
-                                  className="text-[#38B6FF]"
-                                />
-                                <Badge variant="secondary" className="text-xs">
-                                  {String.fromCharCode(65 + optIndex)}
-                                </Badge>
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="text-gray-300 text-sm">Option {String.fromCharCode(65 + optIndex)}</span>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => openOCRModal(question.id, 'option', option.id)}
-                                    className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white text-xs px-2 py-1"
-                                  >
-                                    <Scan className="h-3 w-3 mr-1" />
-                                    OCR
-                                  </Button>
-                                </div>
-                                <Textarea
-                                  value={option.text}
-                                  onChange={(e) => updateMCQOption(question.id, option.id, 'text', e.target.value)}
-                                  placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                                  className="bg-[#2A2A2A] border-gray-600 text-white"
-                                  rows={2}
-                                />
-                              </div>
-                              {question.mcqOptions && question.mcqOptions.length > 2 && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeMCQOption(question.id, option.id)}
-                                  className="text-red-400 hover:text-red-300 mt-1"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                            
-                            {/* Image Upload for MCQ Option */}
-                            <div>
-                              <Label className="text-white text-sm mb-2 block">Option Image (optional)</Label>
-                              <ImageUpload
-                                onImageUpload={(imageData) => updateMCQOption(question.id, option.id, 'image', imageData)}
-                                currentImage={option.image}
-                                onRemoveImage={() => updateMCQOption(question.id, option.id, 'image', undefined)}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => addMCQOption(question.id)}
-                          className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add Option
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  {/* MCQ Options */}
+                  <MCQOptionsEditor
+                    question={question}
+                    onUpdateOption={(optionId, field, value) => updateMCQOption(question.id, optionId, field, value)}
+                    onAddOption={() => addMCQOption(question.id)}
+                    onRemoveOption={(optionId) => removeMCQOption(question.id, optionId)}
+                    onOpenOCR={(optionId) => openOCRModal(question.id, 'option', optionId)}
+                  />
+
+                  {/* Question Subparts */}
+                  <QuestionSubparts
+                    question={question}
+                    onUpdateSubparts={(subparts) => updateQuestion(question.id, 'subparts', subparts)}
+                  />
 
                   {/* Question-specific options */}
                   {question.type === 'question' && (
                     <>
-                      {/* Subparts */}
-                      <div>
-                        <Label className="text-white mb-2 block">Question Subparts</Label>
-                        <div className="space-y-3">
-                          {question.subparts?.map((subpart, index) => (
-                            <div key={subpart.id} className="border border-gray-600 rounded-lg p-4">
-                              <div className="flex items-start space-x-3">
-                                <Badge variant="secondary" className="mt-2">
-                                  {subpart.partNumber}
-                                </Badge>
-                                <div className="flex-1 space-y-3">
-                                  <Textarea
-                                    value={subpart.text}
-                                    onChange={(e) => {
-                                      const updatedSubparts = question.subparts?.map(sp => 
-                                        sp.id === subpart.id ? { ...sp, text: e.target.value } : sp
-                                      );
-                                      updateQuestion(question.id, 'subparts', updatedSubparts);
-                                    }}
-                                    placeholder={`Part ${subpart.partNumber} question text...`}
-                                    className="bg-[#2A2A2A] border-gray-600 text-white"
-                                    rows={2}
-                                  />
-                                  <div className="flex space-x-2">
-                                    <Input
-                                      type="number"
-                                      value={subpart.marks}
-                                      onChange={(e) => {
-                                        const updatedSubparts = question.subparts?.map(sp => 
-                                          sp.id === subpart.id ? { ...sp, marks: parseInt(e.target.value) || 0 } : sp
-                                        );
-                                        updateQuestion(question.id, 'subparts', updatedSubparts);
-                                      }}
-                                      placeholder="Marks"
-                                      className="w-20 bg-[#2A2A2A] border-gray-600 text-white"
-                                    />
-                                    <Select 
-                                      value={subpart.subType || ''} 
-                                      onValueChange={(value) => {
-                                        const updatedSubparts = question.subparts?.map(sp => 
-                                          sp.id === subpart.id ? { ...sp, subType: value as any } : sp
-                                        );
-                                        updateQuestion(question.id, 'subparts', updatedSubparts);
-                                      }}
-                                    >
-                                      <SelectTrigger className="bg-[#2A2A2A] border-gray-600 text-white">
-                                        <SelectValue placeholder="Type" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                                        <SelectItem value="mcq">MCQ</SelectItem>
-                                        <SelectItem value="short">Short</SelectItem>
-                                        <SelectItem value="long">Long</SelectItem>
-                                        <SelectItem value="numerical">Numerical</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        const updatedSubparts = question.subparts?.filter(sp => sp.id !== subpart.id);
-                                        updateQuestion(question.id, 'subparts', updatedSubparts);
-                                      }}
-                                      className="text-red-400 hover:text-red-300"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const newSubpart = {
-                                id: Date.now().toString(),
-                                partNumber: String.fromCharCode(97 + (question.subparts?.length || 0)), // a, b, c, etc.
-                                text: '',
-                                marks: 1,
-                                subType: 'short' as const
-                              };
-                              const updatedSubparts = [...(question.subparts || []), newSubpart];
-                              updateQuestion(question.id, 'subparts', updatedSubparts);
-                            }}
-                            className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Subpart
-                          </Button>
-                        </div>
-                      </div>
-
                       {/* Marking Scheme */}
                       <div>
                         <Label className="text-white mb-2 block">Marking Scheme</Label>
@@ -597,58 +314,7 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
 
       {/* Live Preview Sidebar */}
       <div className="lg:col-span-1">
-        <Card className="bg-[#1E1E1E] border-gray-700 sticky top-4">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">Test Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#38B6FF]">{getQuestionCount()}</div>
-                <div className="text-xs text-gray-400">Questions</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#38B6FF]">{getTotalMarks()}</div>
-                <div className="text-xs text-gray-400">Total Marks</div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-xl font-bold text-[#38B6FF]">
-                {Math.ceil(getTotalMarks() * 1.5)} min
-              </div>
-              <div className="text-xs text-gray-400">Estimated Time</div>
-            </div>
-
-            <div className="border-t border-gray-700 pt-4">
-              <h4 className="text-white font-medium mb-2">Quick Navigation</h4>
-              <div className="space-y-1 max-h-48 overflow-y-auto">
-                {questions.map((question, index) => (
-                  <div
-                    key={question.id}
-                    className="flex items-center justify-between p-2 rounded hover:bg-[#2A2A2A] cursor-pointer"
-                  >
-                    <span className="text-sm text-gray-300">
-                      {question.type === 'question' ? `Q${question.questionNumber}` : question.type}
-                    </span>
-                    <div className="flex space-x-1">
-                      {question.marks && (
-                        <Badge variant="secondary" className="text-xs">
-                          {question.marks}m
-                        </Badge>
-                      )}
-                      {question.metadata && (
-                        <Badge variant="secondary" className="text-xs bg-[#38B6FF]">
-                          ✓
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <TestOverviewSidebar questions={questions} />
       </div>
 
       {/* Question Association Modal */}
