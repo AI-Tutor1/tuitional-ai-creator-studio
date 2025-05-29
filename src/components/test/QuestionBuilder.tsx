@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,8 +34,10 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
   const addQuestion = () => {
+    const questionCount = questions.filter(q => q.type === 'question').length;
     const newQuestion: EnhancedQuestion = {
       id: Date.now().toString(),
+      questionNumber: questionCount + 1,
       type: 'question',
       subType: 'mcq',
       text: '',
@@ -246,6 +247,15 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                     </div>
                   </div>
 
+                  {/* Question Number Display */}
+                  {question.type === 'question' && (
+                    <div className="mt-2">
+                      <Badge variant="secondary" className="bg-[#38B6FF] text-white">
+                        Question {question.questionNumber}
+                      </Badge>
+                    </div>
+                  )}
+
                   {/* Metadata Display */}
                   {question.metadata && (
                     <div className="mt-3 p-3 bg-[#2A2A2A] rounded-lg">
@@ -372,6 +382,99 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                   {/* Question-specific options */}
                   {question.type === 'question' && (
                     <>
+                      {/* Subparts */}
+                      <div>
+                        <Label className="text-white mb-2 block">Question Subparts</Label>
+                        <div className="space-y-3">
+                          {question.subparts?.map((subpart, index) => (
+                            <div key={subpart.id} className="border border-gray-600 rounded-lg p-4">
+                              <div className="flex items-start space-x-3">
+                                <Badge variant="secondary" className="mt-2">
+                                  {subpart.partNumber}
+                                </Badge>
+                                <div className="flex-1 space-y-3">
+                                  <Textarea
+                                    value={subpart.text}
+                                    onChange={(e) => {
+                                      const updatedSubparts = question.subparts?.map(sp => 
+                                        sp.id === subpart.id ? { ...sp, text: e.target.value } : sp
+                                      );
+                                      updateQuestion(question.id, 'subparts', updatedSubparts);
+                                    }}
+                                    placeholder={`Part ${subpart.partNumber} question text...`}
+                                    className="bg-[#2A2A2A] border-gray-600 text-white"
+                                    rows={2}
+                                  />
+                                  <div className="flex space-x-2">
+                                    <Input
+                                      type="number"
+                                      value={subpart.marks}
+                                      onChange={(e) => {
+                                        const updatedSubparts = question.subparts?.map(sp => 
+                                          sp.id === subpart.id ? { ...sp, marks: parseInt(e.target.value) || 0 } : sp
+                                        );
+                                        updateQuestion(question.id, 'subparts', updatedSubparts);
+                                      }}
+                                      placeholder="Marks"
+                                      className="w-20 bg-[#2A2A2A] border-gray-600 text-white"
+                                    />
+                                    <Select 
+                                      value={subpart.subType || ''} 
+                                      onValueChange={(value) => {
+                                        const updatedSubparts = question.subparts?.map(sp => 
+                                          sp.id === subpart.id ? { ...sp, subType: value as any } : sp
+                                        );
+                                        updateQuestion(question.id, 'subparts', updatedSubparts);
+                                      }}
+                                    >
+                                      <SelectTrigger className="bg-[#2A2A2A] border-gray-600 text-white">
+                                        <SelectValue placeholder="Type" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-[#2A2A2A] border-gray-600">
+                                        <SelectItem value="mcq">MCQ</SelectItem>
+                                        <SelectItem value="short">Short</SelectItem>
+                                        <SelectItem value="long">Long</SelectItem>
+                                        <SelectItem value="numerical">Numerical</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const updatedSubparts = question.subparts?.filter(sp => sp.id !== subpart.id);
+                                        updateQuestion(question.id, 'subparts', updatedSubparts);
+                                      }}
+                                      className="text-red-400 hover:text-red-300"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newSubpart = {
+                                id: Date.now().toString(),
+                                partNumber: String.fromCharCode(97 + (question.subparts?.length || 0)), // a, b, c, etc.
+                                text: '',
+                                marks: 1,
+                                subType: 'short' as const
+                              };
+                              const updatedSubparts = [...(question.subparts || []), newSubpart];
+                              updateQuestion(question.id, 'subparts', updatedSubparts);
+                            }}
+                            className="border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Subpart
+                          </Button>
+                        </div>
+                      </div>
+
                       {/* Marking Scheme */}
                       <div>
                         <Label className="text-white mb-2 block">Marking Scheme</Label>
@@ -464,7 +567,7 @@ const QuestionBuilder: React.FC<QuestionBuilderProps> = ({ questions, onQuestion
                     className="flex items-center justify-between p-2 rounded hover:bg-[#2A2A2A] cursor-pointer"
                   >
                     <span className="text-sm text-gray-300">
-                      Q{index + 1}: {question.type}
+                      {question.type === 'question' ? `Q${question.questionNumber}` : question.type}
                     </span>
                     <div className="flex space-x-1">
                       {question.marks && (
