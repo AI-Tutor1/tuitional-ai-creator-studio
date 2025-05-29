@@ -1,432 +1,416 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Plus, 
   Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash2,
-  Clock,
-  Users,
-  FileText,
-  BarChart3,
+  Plus, 
+  BookOpen, 
+  Clock, 
+  Users, 
+  BarChart3, 
+  Settings,
+  Edit,
   Copy,
-  Share2,
+  Trash2,
+  Eye,
+  Send,
+  Filter,
   Calendar,
-  TrendingUp,
-  Award,
-  Target
+  Target,
+  FileText,
+  CheckSquare
 } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import { useToast } from '@/hooks/use-toast';
+import TestEditModal from '@/components/test/TestEditModal';
 
-interface TestData {
+interface Test {
   id: string;
   title: string;
-  code: string;
   subject: string;
-  grade: string;
-  questionCount: number;
-  totalMarks: number;
+  description: string;
   duration: number;
-  createdBy: string;
-  createdDate: string;
-  status: 'Draft' | 'Published' | 'Archived';
+  totalMarks: number;
+  totalQuestions: number;
   assignedStudents: number;
-  completedAttempts: number;
+  completedSubmissions: number;
   averageScore: number;
-  dueDate?: string;
+  status: 'draft' | 'published' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+  originalTestId?: string;
+  questions: Array<{
+    id: string;
+    type: 'mcq' | 'short-answer' | 'essay';
+    question: string;
+    options?: string[];
+    marks: number;
+  }>;
 }
 
 const TeacherTestBank = () => {
-  const [activeTab, setActiveTab] = useState('all-tests');
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    subject: '',
-    grade: '',
-    status: '',
-    dateRange: ''
-  });
+  const [selectedTab, setSelectedTab] = useState('my-tests');
+  const [editingTest, setEditingTest] = useState<Test | null>(null);
 
-  const mockTests: TestData[] = [
+  // Mock test data with versions
+  const [tests, setTests] = useState<Test[]>([
     {
-      id: '1',
+      id: 'test_1',
       title: 'Photosynthesis and Plant Biology',
-      code: 'BIO-101-A',
       subject: 'Biology',
-      grade: '10th',
-      questionCount: 25,
-      totalMarks: 50,
+      description: 'Comprehensive test covering photosynthesis processes, plant anatomy, and cellular respiration.',
       duration: 90,
-      createdBy: 'Dr. Sarah Johnson',
-      createdDate: '2024-01-15',
-      status: 'Published',
-      assignedStudents: 45,
-      completedAttempts: 38,
-      averageScore: 76.5,
-      dueDate: '2024-02-15'
+      totalMarks: 50,
+      totalQuestions: 15,
+      assignedStudents: 28,
+      completedSubmissions: 25,
+      averageScore: 78.5,
+      status: 'published',
+      createdAt: '2024-01-15',
+      updatedAt: '2024-01-15',
+      version: 1,
+      questions: [
+        {
+          id: '1',
+          type: 'mcq',
+          question: 'What is the primary function of chlorophyll in photosynthesis?',
+          options: ['Absorbing light energy', 'Storing glucose', 'Producing oxygen', 'Breaking down water'],
+          marks: 2
+        },
+        {
+          id: '2',
+          type: 'short-answer',
+          question: 'Explain the difference between photosynthesis and cellular respiration.',
+          marks: 6
+        }
+      ]
     },
     {
-      id: '2',
-      title: 'Algebraic Equations Fundamentals',
-      code: 'MATH-201-B',
-      subject: 'Mathematics',
-      grade: '9th',
-      questionCount: 18,
-      totalMarks: 40,
-      duration: 60,
-      createdBy: 'Prof. Michael Chen',
-      createdDate: '2024-01-12',
-      status: 'Draft',
+      id: 'test_1_v2',
+      title: 'Photosynthesis and Plant Biology (Updated)',
+      subject: 'Biology',
+      description: 'Updated version with additional questions on cellular respiration and improved formatting.',
+      duration: 90,
+      totalMarks: 60,
+      totalQuestions: 18,
       assignedStudents: 0,
-      completedAttempts: 0,
-      averageScore: 0
-    },
-    {
-      id: '3',
-      title: 'Chemical Reactions and Stoichiometry',
-      code: 'CHEM-301-C',
-      subject: 'Chemistry',
-      grade: '11th',
-      questionCount: 30,
-      totalMarks: 75,
-      duration: 120,
-      createdBy: 'Dr. Emma Wilson',
-      createdDate: '2024-01-10',
-      status: 'Published',
-      assignedStudents: 32,
-      completedAttempts: 32,
-      averageScore: 82.1,
-      dueDate: '2024-02-10'
+      completedSubmissions: 0,
+      averageScore: 0,
+      status: 'draft',
+      createdAt: '2024-01-20',
+      updatedAt: '2024-01-20',
+      version: 2,
+      originalTestId: 'test_1',
+      questions: [
+        {
+          id: '1',
+          type: 'mcq',
+          question: 'What is the primary function of chlorophyll in photosynthesis?',
+          options: ['Absorbing light energy', 'Storing glucose', 'Producing oxygen', 'Breaking down water'],
+          marks: 2
+        },
+        {
+          id: '2',
+          type: 'short-answer',
+          question: 'Explain the difference between photosynthesis and cellular respiration.',
+          marks: 6
+        },
+        {
+          id: '3',
+          type: 'essay',
+          question: 'Describe the complete process of photosynthesis including light and dark reactions.',
+          marks: 10
+        }
+      ]
     }
-  ];
+  ]);
+
+  const handleEditTest = (test: Test) => {
+    setEditingTest(test);
+  };
+
+  const handleSaveEditedTest = (editedTest: Test) => {
+    setTests(prev => [...prev, editedTest]);
+    setEditingTest(null);
+    
+    toast({
+      title: "Test Updated",
+      description: `New version ${editedTest.version} of "${editedTest.title}" has been created.`,
+    });
+  };
+
+  const handleDuplicateTest = (test: Test) => {
+    const duplicatedTest: Test = {
+      ...test,
+      id: `${test.id}_copy_${Date.now()}`,
+      title: `${test.title} (Copy)`,
+      status: 'draft',
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+      assignedStudents: 0,
+      completedSubmissions: 0,
+      averageScore: 0,
+      version: 1,
+      originalTestId: undefined
+    };
+
+    setTests(prev => [...prev, duplicatedTest]);
+    
+    toast({
+      title: "Test Duplicated",
+      description: `"${duplicatedTest.title}" has been added to your drafts.`,
+    });
+  };
+
+  const handleDeleteTest = (testId: string) => {
+    setTests(prev => prev.filter(test => test.id !== testId));
+    
+    toast({
+      title: "Test Deleted",
+      description: "The test has been permanently removed.",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Published': return 'bg-green-600';
-      case 'Draft': return 'bg-yellow-600';
-      case 'Archived': return 'bg-gray-600';
-      default: return 'bg-gray-600';
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'draft': return 'bg-yellow-100 text-yellow-800';
+      case 'archived': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const testStats = {
-    totalTests: mockTests.length,
-    publishedTests: mockTests.filter(t => t.status === 'Published').length,
-    totalStudentsAssigned: mockTests.reduce((sum, test) => sum + test.assignedStudents, 0),
-    averageCompletionRate: 84.2
+  const getQuestionTypeIcon = (type: string) => {
+    switch (type) {
+      case 'mcq': return <CheckSquare className="h-4 w-4 text-blue-500" />;
+      case 'short-answer': return <Edit className="h-4 w-4 text-green-500" />;
+      case 'essay': return <BookOpen className="h-4 w-4 text-purple-500" />;
+      default: return <FileText className="h-4 w-4 text-gray-500" />;
+    }
   };
 
+  const filteredTests = tests.filter(test =>
+    test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    test.subject.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-[#1E1E1E]">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Teacher Test Bank</h1>
-            <p className="text-gray-400">Manage your tests, assignments, and student performance</p>
-          </div>
-          <Button className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white px-6 py-3 text-lg">
-            <Plus className="mr-2 h-5 w-5" />
-            Create New Test
-          </Button>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[#2A2A2A] border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Total Tests</p>
-                  <p className="text-3xl font-bold text-white">{testStats.totalTests}</p>
-                </div>
-                <FileText className="h-8 w-8 text-[#38B6FF]" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#2A2A2A] border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Published</p>
-                  <p className="text-3xl font-bold text-white">{testStats.publishedTests}</p>
-                </div>
-                <Award className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#2A2A2A] border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Students Assigned</p>
-                  <p className="text-3xl font-bold text-white">{testStats.totalStudentsAssigned}</p>
-                </div>
-                <Users className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#2A2A2A] border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Completion Rate</p>
-                  <p className="text-3xl font-bold text-white">{testStats.averageCompletionRate}%</p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 w-full max-w-md mb-6">
-            <TabsTrigger value="all-tests">All Tests</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all-tests">
-            {/* Filters and Search */}
-            <Card className="bg-[#2A2A2A] border-gray-700 mb-6">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                  <div className="lg:col-span-2">
-                    <Label htmlFor="search" className="text-white mb-2 block">Search Tests</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="search"
-                        placeholder="Search by title or code..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-[#1E1E1E] border-gray-600 text-white"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-white mb-2 block">Subject</Label>
-                    <Select value={filters.subject} onValueChange={(value) => setFilters({...filters, subject: value})}>
-                      <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
-                        <SelectValue placeholder="All Subjects" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                        <SelectItem value="biology">Biology</SelectItem>
-                        <SelectItem value="chemistry">Chemistry</SelectItem>
-                        <SelectItem value="physics">Physics</SelectItem>
-                        <SelectItem value="mathematics">Mathematics</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-white mb-2 block">Status</Label>
-                    <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
-                      <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
-                        <SelectValue placeholder="All Status" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Button variant="outline" className="w-full border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Apply Filters
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Test Table */}
-            <Card className="bg-[#2A2A2A] border-gray-700">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-gray-700">
-                      <TableHead className="text-gray-300">Test Name</TableHead>
-                      <TableHead className="text-gray-300">Subject</TableHead>
-                      <TableHead className="text-gray-300">Questions</TableHead>
-                      <TableHead className="text-gray-300">Assigned</TableHead>
-                      <TableHead className="text-gray-300">Completed</TableHead>
-                      <TableHead className="text-gray-300">Avg Score</TableHead>
-                      <TableHead className="text-gray-300">Status</TableHead>
-                      <TableHead className="text-gray-300">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockTests.map((test) => (
-                      <TableRow key={test.id} className="border-gray-700 hover:bg-[#1E1E1E]">
-                        <TableCell className="text-white">
-                          <div>
-                            <div className="font-medium">{test.title}</div>
-                            <div className="text-sm text-gray-400">{test.code}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-300">{test.subject}</TableCell>
-                        <TableCell className="text-gray-300">
-                          <div className="flex items-center">
-                            <FileText className="mr-1 h-4 w-4" />
-                            {test.questionCount}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-300">
-                          <div className="flex items-center">
-                            <Users className="mr-1 h-4 w-4" />
-                            {test.assignedStudents}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-300">{test.completedAttempts}</TableCell>
-                        <TableCell className="text-gray-300">
-                          {test.averageScore > 0 ? `${test.averageScore}%` : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={`${getStatusColor(test.status)} text-white`}
-                          >
-                            {test.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="performance">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-[#2A2A2A] border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Test Performance Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockTests.filter(t => t.status === 'Published').map((test) => (
-                      <div key={test.id} className="flex items-center justify-between p-3 border border-gray-600 rounded-lg">
-                        <div>
-                          <div className="font-medium text-white">{test.title}</div>
-                          <div className="text-sm text-gray-400">{test.completedAttempts}/{test.assignedStudents} completed</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-[#38B6FF]">{test.averageScore}%</div>
-                          <div className="text-sm text-gray-400">avg score</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-[#2A2A2A] border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Button className="w-full justify-start bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
-                      <BarChart3 className="mr-2 h-4 w-4" />
-                      View Detailed Analytics
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start border-gray-600 text-gray-300 hover:bg-gray-700">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Schedule New Test
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start border-gray-600 text-gray-300 hover:bg-gray-700">
-                      <Target className="mr-2 h-4 w-4" />
-                      Create Test Template
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Teacher Test Bank</h1>
+              <p className="text-gray-600">Create, manage, and analyze your tests</p>
             </div>
-          </TabsContent>
+            <Button className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
+              <Plus className="mr-2 h-4 w-4" />
+              Create New Test
+            </Button>
+          </div>
+        </div>
+      </div>
 
-          <TabsContent value="assignments">
-            <Card className="bg-[#2A2A2A] border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white">Active Assignments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockTests.filter(t => t.status === 'Published' && t.dueDate).map((test) => (
-                    <div key={test.id} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium text-white">{test.title}</div>
-                        <div className="text-sm text-gray-400 mt-1">
-                          Due: {new Date(test.dueDate!).toLocaleDateString()} • {test.assignedStudents} students
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search tests by title or subject..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+
+          {/* Tabs */}
+          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsList>
+              <TabsTrigger value="my-tests">My Tests ({tests.length})</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="my-tests" className="space-y-6">
+              {/* Test Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTests.map((test) => (
+                  <Card key={test.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-2">{test.title}</CardTitle>
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Badge className={getStatusColor(test.status)}>
+                              {test.status}
+                            </Badge>
+                            {test.version > 1 && (
+                              <Badge variant="outline">
+                                v{test.version}
+                              </Badge>
+                            )}
+                            {test.originalTestId && (
+                              <Badge variant="outline" className="text-xs">
+                                Based on: {test.originalTestId}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{test.description}</p>
                         </div>
-                        <div className="flex items-center mt-2 space-x-4">
-                          <span className="text-sm text-gray-400">
-                            Progress: {test.completedAttempts}/{test.assignedStudents}
-                          </span>
-                          <div className="flex-1 bg-gray-700 rounded-full h-2 max-w-xs">
-                            <div 
-                              className="bg-[#38B6FF] h-2 rounded-full" 
-                              style={{ width: `${(test.completedAttempts / test.assignedStudents) * 100}%` }}
-                            ></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{test.subject}</span>
+                        <span>Updated {test.updatedAt}</span>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-4">
+                      {/* Test Stats */}
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{test.duration} min</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Target className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{test.totalMarks} marks</span>
+                        </div>
+                        <div className="flex items-center">
+                          <FileText className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{test.totalQuestions} questions</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{test.assignedStudents} students</span>
+                        </div>
+                      </div>
+
+                      {/* Question Types */}
+                      <div className="space-y-2">
+                        <div className="text-xs text-gray-500 font-medium">Question Types:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.from(new Set(test.questions.map(q => q.type))).map((type) => (
+                            <div key={type} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded text-xs">
+                              {getQuestionTypeIcon(type)}
+                              <span className="capitalize">{type.replace('-', ' ')}</span>
+                              <span>({test.questions.filter(q => q.type === type).length})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Performance Stats */}
+                      {test.status === 'published' && test.completedSubmissions > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Avg. Score:</span>
+                            <span className="font-medium">{test.averageScore}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Submissions:</span>
+                            <span>{test.completedSubmissions}/{test.assignedStudents}</span>
                           </div>
                         </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex justify-between items-center pt-2">
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditTest(test)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDuplicateTest(test)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteTest(test.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        {test.status === 'published' ? (
+                          <Button variant="outline" size="sm">
+                            <BarChart3 className="mr-2 h-4 w-4" />
+                            Analytics
+                          </Button>
+                        ) : (
+                          <Button size="sm" className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
+                            <Send className="mr-2 h-4 w-4" />
+                            Publish
+                          </Button>
+                        )}
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                          <Users className="h-4 w-4 mr-1" />
-                          Manage
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Test Analytics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">Analytics dashboard coming soon...</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="templates">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Test Templates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">Template library coming soon...</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
+
+      {/* Edit Test Modal */}
+      {editingTest && (
+        <TestEditModal
+          test={editingTest}
+          onClose={() => setEditingTest(null)}
+          onSave={handleSaveEditedTest}
+        />
+      )}
     </div>
   );
 };
