@@ -3,10 +3,10 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileImage, X, Copy, Check, FileText, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 import { createWorker } from 'tesseract.js';
-import { Badge } from '@/components/ui/badge';
+import OCRImageUpload from './OCRImageUpload';
+import OCRTextExtraction from './OCRTextExtraction';
 
 interface TeacherOCRProps {
   onTextExtracted: (text: string, insertMode?: 'replace' | 'append') => void;
@@ -25,8 +25,6 @@ const TeacherOCR: React.FC<TeacherOCRProps> = ({
   const [progress, setProgress] = useState(0);
   const [extractedText, setExtractedText] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -73,31 +71,6 @@ const TeacherOCR: React.FC<TeacherOCRProps> = ({
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  };
-
-  const copyText = async () => {
-    try {
-      await navigator.clipboard.writeText(extractedText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy text:', error);
-    }
-  };
-
   const useExtractedText = (mode: 'replace' | 'append' = 'replace') => {
     onTextExtracted(extractedText, mode);
     onClose();
@@ -107,9 +80,6 @@ const TeacherOCR: React.FC<TeacherOCRProps> = ({
     setImagePreview(null);
     setExtractedText('');
     setProgress(0);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   return (
@@ -127,43 +97,13 @@ const TeacherOCR: React.FC<TeacherOCRProps> = ({
         
         <CardContent className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
           <div className="space-y-4">
-            {/* Upload Area */}
-            {!imagePreview && (
-              <div
-                className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-[#38B6FF] transition-colors"
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-300 mb-2">Drop an image here or click to upload</p>
-                <p className="text-gray-500 text-sm">{placeholder}</p>
-                <div className="mt-4 flex justify-center space-x-2">
-                  <Badge variant="secondary" className="bg-blue-600 text-white text-xs">Handwritten</Badge>
-                  <Badge variant="secondary" className="bg-green-600 text-white text-xs">Printed Text</Badge>
-                  <Badge variant="secondary" className="bg-purple-600 text-white text-xs">Mathematical</Badge>
-                </div>
-              </div>
-            )}
-
-            {/* Image Preview */}
-            {imagePreview && (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Uploaded for OCR"
-                  className="w-full max-h-64 object-contain rounded-lg border border-gray-600"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
-                  onClick={resetOCR}
-                >
-                  <X className="h-4 w-4 text-white" />
-                </Button>
-              </div>
-            )}
+            {/* Image Upload */}
+            <OCRImageUpload
+              onFileUpload={handleFileUpload}
+              imagePreview={imagePreview}
+              onResetImage={resetOCR}
+              placeholder={placeholder}
+            />
 
             {/* Progress Bar */}
             {isProcessing && (
@@ -178,53 +118,13 @@ const TeacherOCR: React.FC<TeacherOCRProps> = ({
 
             {/* Extracted Text */}
             {extractedText && !isProcessing && (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-white font-medium">Extracted Text:</label>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={copyText}>
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={resetOCR}>
-                      <FileText className="h-4 w-4" />
-                      New Image
-                    </Button>
-                  </div>
-                </div>
-                <Textarea
-                  value={extractedText}
-                  onChange={(e) => setExtractedText(e.target.value)}
-                  className="bg-[#1E1E1E] border-gray-600 text-white min-h-[120px]"
-                  placeholder="Extracted text will appear here. You can edit it before using."
-                />
-                <div className="flex justify-end space-x-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => useExtractedText('append')}
-                    className="border-gray-600 text-gray-300"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Append Text
-                  </Button>
-                  <Button 
-                    onClick={() => useExtractedText('replace')} 
-                    className="bg-[#38B6FF] hover:bg-[#2A9DE8]"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Use Text
-                  </Button>
-                </div>
-              </div>
+              <OCRTextExtraction
+                extractedText={extractedText}
+                onTextChange={setExtractedText}
+                onUseText={useExtractedText}
+                onNewImage={resetOCR}
+              />
             )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
           </div>
         </CardContent>
       </Card>
