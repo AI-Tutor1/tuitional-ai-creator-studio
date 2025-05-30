@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -16,9 +15,12 @@ import {
   BookOpen,
   GraduationCap,
   Award,
-  FileText
+  FileText,
+  BookTemplate,
+  Search
 } from 'lucide-react';
 import { QuestionMetadata } from '@/types/question';
+import AssociationTemplates from './AssociationTemplates';
 
 interface QuestionAssociationModalProps {
   isOpen: boolean;
@@ -34,6 +36,8 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
   initialMetadata = {}
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [metadata, setMetadata] = useState<Partial<QuestionMetadata>>({
     topic: [],
     subject: '',
@@ -63,42 +67,63 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
     { id: 4, title: 'Additional', icon: FileText }
   ];
 
-  // Enhanced predefined options
+  // Enhanced predefined options with search capability
   const subjects = [
     'Mathematics', 'Biology', 'Chemistry', 'Physics', 'English', 'History', 
     'Geography', 'Economics', 'Business Studies', 'Computer Science', 
-    'Psychology', 'Sociology', 'Art & Design', 'Music', 'French', 'Spanish'
+    'Psychology', 'Sociology', 'Art & Design', 'Music', 'French', 'Spanish',
+    'German', 'Italian', 'Chinese', 'Arabic', 'Environmental Science',
+    'Philosophy', 'Drama', 'Physical Education', 'Design Technology'
   ];
   
   const grades = [
-    'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'Year 7', 
-    'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'
+    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 
+    'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13',
+    'Form 1', 'Form 2', 'Form 3', 'Form 4', 'Form 5', 'Form 6'
   ];
   
   const curriculums = [
     'CBSE', 'ICSE', 'IB', 'Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC', 
-    'CCEA', 'SQA', 'NCEA', 'VCE', 'HSC'
+    'CCEA', 'SQA', 'NCEA', 'VCE', 'HSC', 'NZQA', 'VCAA', 'NESA',
+    'Pearson', 'CIE', 'International Baccalaureate', 'British Curriculum'
   ];
   
   const boards = [
     'Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC', 'CCEA', 'CIE', 
-    'Pearson', 'SQA', 'NZQA', 'VCAA', 'NESA'
+    'Pearson', 'SQA', 'NZQA', 'VCAA', 'NESA', 'IB Organization',
+    'CBSE Board', 'ICSE Board', 'Maharashtra Board', 'Kerala Board'
   ];
   
   const levels = [
     'IGCSE', 'GCSE', 'A-Level', 'AS-Level', 'O-Level', 'IB DP', 
-    'IB MYP', 'Advanced Higher', 'Higher', 'National 5'
+    'IB MYP', 'Advanced Higher', 'Higher', 'National 5', 'National 4',
+    'Standard Grade', 'Intermediate', 'Foundation', 'Advanced'
   ];
   
   const syllabusTypes = [
     'Extended', 'Core', 'Foundation', 'Higher', 'Standard Level', 
-    'Higher Level', 'Ordinary Level', 'Advanced Level'
+    'Higher Level', 'Ordinary Level', 'Advanced Level', 'Basic',
+    'Accelerated', 'Remedial', 'Enriched'
   ];
 
   const attemptOptions = [
-    'First Attempt', 'Second Attempt', 'Third Attempt', 'Resit', 
-    'Mock Exam', 'Practice Paper'
+    'First Attempt', 'Second Attempt', 'Third Attempt', 'Fourth Attempt',
+    'Resit', 'Mock Exam', 'Practice Paper', 'Trial Exam', 'Supplementary'
   ];
+
+  const paperTypes = [
+    'Theory', 'Practical', 'Coursework', 'Project', 'Oral', 'Written',
+    'Multiple Choice', 'Structured', 'Essay', 'Problem Solving',
+    'Investigation', 'Assessment', 'Controlled Assessment'
+  ];
+
+  // Filter options based on search term
+  const filterOptions = (options: string[], term: string) => {
+    if (!term) return options;
+    return options.filter(option => 
+      option.toLowerCase().includes(term.toLowerCase())
+    );
+  };
 
   const handleNext = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
@@ -131,6 +156,14 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
     }));
   };
 
+  const applyTemplate = (template: any) => {
+    setMetadata(prev => ({
+      ...prev,
+      ...template.metadata
+    }));
+    setShowTemplates(false);
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -146,8 +179,18 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
                   <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
                     <SelectValue placeholder="Select subject" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                    {subjects.map(subject => (
+                  <SelectContent className="bg-[#2A2A2A] border-gray-600 max-h-60">
+                    <div className="sticky top-0 p-2 bg-[#2A2A2A]">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search subjects..."
+                          className="pl-8 bg-[#1E1E1E] border-gray-600 text-white"
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    {filterOptions(subjects, searchTerm).map(subject => (
                       <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                     ))}
                   </SelectContent>
@@ -345,19 +388,16 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">Paper Type</Label>
-                <Input
-                  placeholder="Add paper type and press Enter"
-                  className="bg-[#1E1E1E] border-gray-600 text-white"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      const value = (e.target as HTMLInputElement).value.trim();
-                      if (value) {
-                        addToArray('paperType', value);
-                        (e.target as HTMLInputElement).value = '';
-                      }
-                    }
-                  }}
-                />
+                <Select onValueChange={(value) => addToArray('paperType', value)}>
+                  <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
+                    <SelectValue placeholder="Add paper type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
+                    {paperTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <div className="flex flex-wrap gap-1">
                   {metadata.paperType?.map((type, index) => (
                     <Badge key={index} variant="secondary" className="bg-teal-600 text-white">
@@ -579,72 +619,96 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2A2A2A] border-gray-700 max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[#2A2A2A] border-gray-700 max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white text-2xl">Question Association</DialogTitle>
+          <DialogTitle className="text-white text-2xl flex items-center justify-between">
+            Question Association
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              <BookTemplate className="mr-2 h-4 w-4" />
+              Templates
+            </Button>
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Progress Stepper */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
-                ${currentStep >= step.id 
-                  ? 'bg-[#38B6FF] border-[#38B6FF] text-white' 
-                  : 'border-gray-600 text-gray-400'
-                }`}>
-                <step.icon className="w-5 h-5" />
-              </div>
-              <span className={`ml-2 font-medium ${currentStep >= step.id ? 'text-white' : 'text-gray-400'}`}>
-                {step.title}
-              </span>
-              {index < steps.length - 1 && (
-                <div className={`mx-4 h-0.5 w-16 ${currentStep > step.id ? 'bg-[#38B6FF]' : 'bg-gray-600'}`} />
-              )}
+        {showTemplates ? (
+          <div className="max-h-[70vh] overflow-y-auto">
+            <AssociationTemplates
+              templates={[]}
+              onApplyTemplate={applyTemplate}
+              onSaveTemplate={() => {}}
+              onDeleteTemplate={() => {}}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Progress Stepper */}
+            <div className="flex items-center justify-between mb-8">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
+                    ${currentStep >= step.id 
+                      ? 'bg-[#38B6FF] border-[#38B6FF] text-white' 
+                      : 'border-gray-600 text-gray-400'
+                    }`}>
+                    <step.icon className="w-5 h-5" />
+                  </div>
+                  <span className={`ml-2 font-medium ${currentStep >= step.id ? 'text-white' : 'text-gray-400'}`}>
+                    {step.title}
+                  </span>
+                  {index < steps.length - 1 && (
+                    <div className={`mx-4 h-0.5 w-16 ${currentStep > step.id ? 'bg-[#38B6FF]' : 'bg-gray-600'}`} />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Step Content */}
-        <div className="min-h-[400px]">
-          {renderStepContent()}
-        </div>
+            {/* Step Content */}
+            <div className="min-h-[400px]">
+              {renderStepContent()}
+            </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between items-center pt-6 border-t border-gray-700">
-          <div>
-            {currentStep > 1 && (
-              <Button 
-                variant="outline" 
-                onClick={handlePrevious}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-            )}
-          </div>
+            {/* Navigation */}
+            <div className="flex justify-between items-center pt-6 border-t border-gray-700">
+              <div>
+                {currentStep > 1 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handlePrevious}
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Previous
+                  </Button>
+                )}
+              </div>
 
-          <div className="flex space-x-3">
-            {currentStep < 4 ? (
-              <Button 
-                onClick={handleNext}
-                className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white"
-              >
-                Next
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Save Association
-              </Button>
-            )}
-          </div>
-        </div>
+              <div className="flex space-x-3">
+                {currentStep < 4 ? (
+                  <Button 
+                    onClick={handleNext}
+                    className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white"
+                  >
+                    Next
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handleSave}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Association
+                  </Button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
