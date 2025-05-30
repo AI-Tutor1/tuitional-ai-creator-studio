@@ -63,12 +63,42 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
     { id: 4, title: 'Additional', icon: FileText }
   ];
 
-  const subjects = ['Mathematics', 'Biology', 'Chemistry', 'Physics', 'English', 'History'];
-  const grades = ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
-  const curriculums = ['CBSE', 'ICSE', 'IB', 'Cambridge', 'Edexcel'];
-  const boards = ['Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC'];
-  const levels = ['IGCSE', 'GCSE', 'A-Level', 'O-Level'];
-  const syllabusTypes = ['Extended', 'Core', 'Foundation', 'Higher'];
+  // Enhanced predefined options
+  const subjects = [
+    'Mathematics', 'Biology', 'Chemistry', 'Physics', 'English', 'History', 
+    'Geography', 'Economics', 'Business Studies', 'Computer Science', 
+    'Psychology', 'Sociology', 'Art & Design', 'Music', 'French', 'Spanish'
+  ];
+  
+  const grades = [
+    'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'Year 7', 
+    'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'
+  ];
+  
+  const curriculums = [
+    'CBSE', 'ICSE', 'IB', 'Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC', 
+    'CCEA', 'SQA', 'NCEA', 'VCE', 'HSC'
+  ];
+  
+  const boards = [
+    'Cambridge', 'Edexcel', 'AQA', 'OCR', 'WJEC', 'CCEA', 'CIE', 
+    'Pearson', 'SQA', 'NZQA', 'VCAA', 'NESA'
+  ];
+  
+  const levels = [
+    'IGCSE', 'GCSE', 'A-Level', 'AS-Level', 'O-Level', 'IB DP', 
+    'IB MYP', 'Advanced Higher', 'Higher', 'National 5'
+  ];
+  
+  const syllabusTypes = [
+    'Extended', 'Core', 'Foundation', 'Higher', 'Standard Level', 
+    'Higher Level', 'Ordinary Level', 'Advanced Level'
+  ];
+
+  const attemptOptions = [
+    'First Attempt', 'Second Attempt', 'Third Attempt', 'Resit', 
+    'Mock Exam', 'Practice Paper'
+  ];
 
   const handleNext = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
@@ -362,6 +392,60 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
                       <X 
                         className="ml-1 h-3 w-3 cursor-pointer" 
                         onClick={() => removeFromArray('paperCode', code)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Attempt</Label>
+                <Select onValueChange={(value) => addToArray('attempt', value)}>
+                  <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
+                    <SelectValue placeholder="Add attempt" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
+                    {attemptOptions.map(attempt => (
+                      <SelectItem key={attempt} value={attempt}>{attempt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex flex-wrap gap-1">
+                  {metadata.attempt?.map((attempt, index) => (
+                    <Badge key={index} variant="secondary" className="bg-emerald-600 text-white">
+                      {attempt}
+                      <X 
+                        className="ml-1 h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('attempt', attempt)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Syllabus Code</Label>
+                <Input
+                  placeholder="Add syllabus code and press Enter"
+                  className="bg-[#1E1E1E] border-gray-600 text-white"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const value = (e.target as HTMLInputElement).value.trim();
+                      if (value) {
+                        addToArray('syllabusCode', value);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  }}
+                />
+                <div className="flex flex-wrap gap-1">
+                  {metadata.syllabusCode?.map((code, index) => (
+                    <Badge key={index} variant="secondary" className="bg-violet-600 text-white">
+                      {code}
+                      <X 
+                        className="ml-1 h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('syllabusCode', code)}
                       />
                     </Badge>
                   ))}
