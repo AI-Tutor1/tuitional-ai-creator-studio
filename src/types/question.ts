@@ -6,6 +6,15 @@ export interface MCQOption {
   image?: string;
 }
 
+export interface QuestionAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  data: string; // base64 encoded file data
+  uploadedAt: string;
+}
+
 export interface QuestionSubpart {
   id: string;
   partNumber: string;
@@ -51,6 +60,7 @@ export interface EnhancedQuestion {
   includeDiagram: boolean;
   image?: string;
   markingScheme?: string;
+  attachments?: QuestionAttachment[];
   mcqOptions?: MCQOption[];
   subparts?: QuestionSubpart[];
   metadata?: QuestionMetadata;

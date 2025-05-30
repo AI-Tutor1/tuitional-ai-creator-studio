@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,11 +17,12 @@ import {
   Image,
   FileText
 } from 'lucide-react';
-import { EnhancedQuestion } from '@/types/question';
+import { EnhancedQuestion, QuestionAttachment } from '@/types/question';
 import MathTextEditor from './MathTextEditor';
 import TeacherOCR from './TeacherOCR';
 import CalculatorComponent from './Calculator';
 import ImageUpload from './ImageUpload';
+import FileAttachment from './FileAttachment';
 
 interface EnhancedQuestionFormProps {
   question: EnhancedQuestion;
@@ -33,6 +33,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
   const [showMathEditor, setShowMathEditor] = useState(false);
   const [showOCR, setShowOCR] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showFileAttachment, setShowFileAttachment] = useState(false);
   const [ocrTarget, setOcrTarget] = useState<{ field: string; optionIndex?: number } | null>(null);
 
   const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'append') => {
@@ -92,6 +93,17 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
       return opt;
     });
     onUpdate('mcqOptions', newOptions);
+  };
+
+  const handleAttachmentAdd = (attachment: QuestionAttachment) => {
+    const currentAttachments = question.attachments || [];
+    onUpdate('attachments', [...currentAttachments, attachment]);
+    setShowFileAttachment(false);
+  };
+
+  const handleAttachmentRemove = (attachmentId: string) => {
+    const currentAttachments = question.attachments || [];
+    onUpdate('attachments', currentAttachments.filter(att => att.id !== attachmentId));
   };
 
   return (
@@ -317,6 +329,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setShowFileAttachment(!showFileAttachment)}
                 className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"
               >
                 <Link className="h-4 w-4 mr-1" />
@@ -336,6 +349,31 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
           <div className="mt-3 text-sm text-gray-400">
             Include: Expected answers, partial credit allocation, common mistakes to avoid, and grading rubric.
           </div>
+          
+          {/* File Attachment Section */}
+          {showFileAttachment && (
+            <div className="mt-4">
+              <Separator className="mb-4" />
+              <h4 className="text-white font-medium mb-3">Attach Reference Files</h4>
+              <FileAttachment
+                attachments={question.attachments}
+                onAttachmentAdd={handleAttachmentAdd}
+                onAttachmentRemove={handleAttachmentRemove}
+              />
+            </div>
+          )}
+          
+          {/* Show existing attachments if any */}
+          {!showFileAttachment && question.attachments && question.attachments.length > 0 && (
+            <div className="mt-4">
+              <Separator className="mb-3" />
+              <FileAttachment
+                attachments={question.attachments}
+                onAttachmentAdd={handleAttachmentAdd}
+                onAttachmentRemove={handleAttachmentRemove}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
