@@ -98,34 +98,37 @@ const StudentTestDashboard = () => {
       label: 'Back to Results',
       icon: ArrowLeft,
       onClick: () => window.history.back(),
-      variant: 'outline' as const
+      variant: 'outline' as const,
+      className: 'border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700 hover:text-white'
     },
     {
       label: 'Study Plan',
       icon: BookOpen,
       onClick: () => console.log('Generate study plan'),
-      className: 'bg-[#38B6FF] hover:bg-[#2A9DE8] text-white'
+      className: 'bg-[#38B6FF] hover:bg-[#2A9DE8] text-white border-0'
     },
     {
       label: 'Practice Similar',
       icon: Target,
       onClick: () => console.log('Find practice questions'),
-      variant: 'outline' as const
+      variant: 'outline' as const,
+      className: 'border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700 hover:text-white'
     },
     {
       label: 'Performance Trends',
       icon: BarChart3,
       onClick: () => console.log('View trends'),
-      variant: 'outline' as const
+      variant: 'outline' as const,
+      className: 'border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700 hover:text-white'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-[#1E1E1E]">
+    <div className="min-h-screen bg-[#1A1A1A]">
       {/* Header */}
       <div className="bg-[#2A2A2A] border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 space-y-4 sm:space-y-0">
             <div className="flex items-center">
               <Link to={`/test-results/${testId}`}>
                 <Button variant="ghost" className="text-gray-400 hover:text-white mr-4">
@@ -162,13 +165,13 @@ const StudentTestDashboard = () => {
               title="Correct Answers"
               value={`${mockData.performance.correctAnswers}/${mockData.performance.totalQuestions}`}
               icon={CheckCircle}
-              iconColor="text-green-500"
+              iconColor="text-green-400"
             />
             <StatCard
               title="Time Spent"
               value={formatTime(mockData.performance.timeSpent)}
               icon={Clock}
-              iconColor="text-blue-500"
+              iconColor="text-blue-400"
               description={`of ${formatTime(mockData.test.duration)} total`}
             />
           </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,11 +14,13 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BackButton from '@/components/shared/BackButton';
 
 const StudentTestBank = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const navigate = useNavigate();
 
   // Mock data for available tests
   const availableTests = [
@@ -97,21 +100,34 @@ const StudentTestBank = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'available': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'completed': return <CheckCircle className="h-4 w-4 text-blue-500" />;
-      case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      default: return <BookOpen className="h-4 w-4 text-gray-500" />;
+      case 'available': return <CheckCircle className="h-4 w-4 text-green-400" />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-blue-400" />;
+      case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-400" />;
+      default: return <BookOpen className="h-4 w-4 text-gray-400" />;
     }
   };
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-green-500';
+      case 'Medium': return 'bg-yellow-500';
+      case 'Hard': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const handleStartTest = (testId: number) => {
+    navigate(`/test-taking/${testId}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1A1A1A]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <BackButton to="/" label="Back to Dashboard" />
+        <BackButton to="/" label="Back to Dashboard" className="text-gray-300 hover:text-white hover:bg-gray-700" />
         
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Available Tests</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold text-white">Available Tests</h1>
+          <p className="mt-1 text-sm text-gray-400">
             View and take your assigned tests
           </p>
         </div>
@@ -124,10 +140,10 @@ const StudentTestBank = () => {
               placeholder="Search tests..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-[#2A2A2A] border-gray-700 text-white placeholder-gray-400"
             />
           </div>
-          <Button variant="outline">
+          <Button variant="outline" className="border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700">
             <Filter className="mr-2 h-4 w-4" />
             Filters
           </Button>
@@ -136,46 +152,51 @@ const StudentTestBank = () => {
         {/* Tests Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTests.map((test) => (
-            <Card key={test.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex items-center justify-between">
+            <Card key={test.id} className="bg-[#2A2A2A] border-gray-700 hover:shadow-lg transition-all duration-200 hover:border-[#38B6FF]">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center space-x-2">
                   {getStatusIcon(test.status)}
-                  <CardTitle>{test.title}</CardTitle>
+                  <CardTitle className="text-white text-lg">{test.title}</CardTitle>
                 </div>
-                <Badge variant="secondary">{test.difficulty}</Badge>
+                <Badge className={`${getDifficultyColor(test.difficulty)} text-white`}>
+                  {test.difficulty}
+                </Badge>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500 mb-4">{test.description}</p>
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-gray-400" />
+                <p className="text-sm text-gray-400 mb-4">{test.description}</p>
+                <div className="flex items-center space-x-4 text-sm mb-4">
+                  <div className="flex items-center text-gray-300">
+                    <BookOpen className="mr-2 h-4 w-4 text-[#38B6FF]" />
                     {test.questions} Questions
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="mr-2 h-4 w-4 text-gray-400" />
+                  <div className="flex items-center text-gray-300">
+                    <Clock className="mr-2 h-4 w-4 text-[#38B6FF]" />
                     {test.duration} Minutes
                   </div>
                 </div>
-                <div className="flex items-center space-x-4 mt-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
                   {test.status === 'available' && (
-                    <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
+                    <Button 
+                      className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white w-full sm:w-auto"
+                      onClick={() => handleStartTest(test.id)}
+                    >
                       <Play className="mr-2 h-4 w-4" />
                       Start Test
                     </Button>
                   )}
                   {test.status === 'pending' && (
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="border-yellow-500 text-yellow-400">
                       Due: {test.dueDate}
                     </Badge>
                   )}
                   {test.status === 'completed' && (
-                    <Badge variant="default">
+                    <Badge className="bg-blue-500 text-white">
                       Completed
                     </Badge>
                   )}
-                  <div className="flex items-center space-x-1 text-gray-500">
-                    <Star className="h-4 w-4" />
-                    {test.attempts}/{test.maxAttempts} Attempts
+                  <div className="flex items-center space-x-1 text-gray-400">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span className="text-sm">{test.attempts}/{test.maxAttempts} Attempts</span>
                   </div>
                 </div>
               </CardContent>

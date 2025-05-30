@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,26 +26,13 @@ const TeacherTestBank = () => {
     setIsModalOpen(false);
   };
 
-  const actionButtons = [
-    {
-      label: 'Edit',
-      icon: BookOpen,
-      onClick: () => alert('Edit clicked'),
-    },
-    {
-      label: 'Analytics',
-      icon: BarChart3,
-      onClick: () => alert('Analytics clicked'),
-    },
-  ];
-
   const tests = mockTests;
 
   const stats = [
-    { title: 'Total Tests', value: 12, icon: BookOpen, iconColor: 'text-blue-500' },
-    { title: 'Avg. Questions', value: 25, icon: BookOpen, iconColor: 'text-green-500' },
-    { title: 'Total Attempts', value: 1234, icon: BookOpen, iconColor: 'text-purple-500' },
-    { title: 'Avg. Score', value: '78%', icon: BookOpen, iconColor: 'text-yellow-500' },
+    { title: 'Total Tests', value: 12, icon: BookOpen, iconColor: 'text-blue-400' },
+    { title: 'Avg. Questions', value: 25, icon: BookOpen, iconColor: 'text-green-400' },
+    { title: 'Total Attempts', value: 1234, icon: BookOpen, iconColor: 'text-purple-400' },
+    { title: 'Avg. Score', value: '78%', icon: BookOpen, iconColor: 'text-yellow-400' },
   ];
 
   return (
@@ -60,7 +48,7 @@ const TeacherTestBank = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
             <StatCard key={index} {...stat} />
           ))}
@@ -69,14 +57,14 @@ const TeacherTestBank = () => {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Search and Create Test */}
-          <div className="lg:col-span-1">
-            <div className="mb-6">
+          <div className="lg:col-span-1 space-y-6">
+            <div>
               <Input
                 type="text"
                 placeholder="Search tests..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-[#2A2A2A] border-gray-700 text-white"
+                className="bg-[#2A2A2A] border-gray-700 text-white placeholder-gray-400"
               />
             </div>
             <Button className="w-full bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
@@ -87,25 +75,27 @@ const TeacherTestBank = () => {
 
           {/* Tests List */}
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {tests.map((test) => (
-                <Card key={test.id} className="bg-[#2A2A2A] border-gray-700">
+                <Card key={test.id} className="bg-[#2A2A2A] border-gray-700 hover:border-[#38B6FF] transition-colors">
                   <CardHeader>
                     <CardTitle className="text-white">{test.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-400">{test.description}</p>
+                    <p className="text-gray-400 mb-4">{test.description}</p>
                     <ActionButtonGroup
                       buttons={[
                         {
                           label: 'Edit',
                           icon: BookOpen,
                           onClick: () => handleEditTest(test),
+                          className: 'border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700 hover:text-white'
                         },
                         {
                           label: 'Analytics',
                           icon: BarChart3,
                           onClick: () => alert('Analytics clicked'),
+                          className: 'border-gray-600 text-white bg-[#2A2A2A] hover:bg-gray-700 hover:text-white'
                         },
                       ]}
                     />
