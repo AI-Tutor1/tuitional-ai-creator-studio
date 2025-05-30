@@ -62,4 +62,6 @@ export interface EnhancedQuestion {
   skipRate?: number;
   hintUsage?: number;
   successRate?: number;
+  viewCount?: number;
+  completionRate?: number;
 }
