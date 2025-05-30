@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,8 +31,8 @@ interface CreateTestModalProps {
 }
 
 const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) => {
-  const [activeStep, setActiveStep] = useState(1);
-  const [testData, setTestData] = useState({
+  const [activeStep, setActiveStep] = React.useState(1);
+  const [testData, setTestData] = React.useState({
     title: '',
     description: '',
     subject: '',
@@ -44,9 +44,9 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) =>
     instructions: '',
     passingMarks: 40
   });
-  const [questions, setQuestions] = useState<EnhancedQuestion[]>([]);
-  const [selectedSuggestedQuestions, setSelectedSuggestedQuestions] = useState<string[]>([]);
-  const [newTopic, setNewTopic] = useState('');
+  const [questions, setQuestions] = React.useState<EnhancedQuestion[]>([]);
+  const [selectedSuggestedQuestions, setSelectedSuggestedQuestions] = React.useState<string[]>([]);
+  const [newTopic, setNewTopic] = React.useState('');
 
   // Mock suggested questions based on selected topics
   const suggestedQuestions: EnhancedQuestion[] = [
@@ -120,7 +120,7 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) =>
         board: ['Cambridge'],
         difficulty: 'Core',
         year: [2023],
-        paperType: ['Theory'],
+        paperType: ['0610/12'],
         paperCode: ['0610/12'],
         attempt: [1],
         syllabusCode: ['0610'],

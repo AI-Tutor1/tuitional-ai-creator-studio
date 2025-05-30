@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,10 +36,10 @@ const QuestionAssociationModal: React.FC<QuestionAssociationModalProps> = ({
   onSave,
   initialMetadata = {}
 }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [metadata, setMetadata] = useState<Partial<QuestionMetadata>>({
+  const [currentStep, setCurrentStep] = React.useState(1);
+  const [showTemplates, setShowTemplates] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [metadata, setMetadata] = React.useState<Partial<QuestionMetadata>>({
     topic: [],
     subject: '',
     grade: [],

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,8 +51,8 @@ const AssociationTemplates: React.FC<AssociationTemplatesProps> = ({
   onSaveTemplate,
   onDeleteTemplate
 }) => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newTemplate, setNewTemplate] = useState<Partial<AssociationTemplate>>({
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [newTemplate, setNewTemplate] = React.useState<Partial<AssociationTemplate>>({
     name: '',
     description: '',
     metadata: {},
