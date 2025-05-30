@@ -22,7 +22,7 @@ interface Question {
 }
 
 interface QuestionsListProps {
-  questions: Question[];
+  questions?: Question[];
   editingQuestionId: string | null;
   onAddQuestion: () => void;
   onEditQuestion: (questionId: string | null) => void;
@@ -33,7 +33,7 @@ interface QuestionsListProps {
 }
 
 const QuestionsList: React.FC<QuestionsListProps> = ({
-  questions,
+  questions = [],
   editingQuestionId,
   onAddQuestion,
   onEditQuestion,
@@ -64,73 +64,94 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         </Button>
       </div>
 
-      <div className="space-y-3">
-        {questions.map((question, index) => (
-          <Card key={question.id} className="bg-[#1E1E1E] border-gray-600">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  {getQuestionTypeIcon(question.type)}
-                  <span className="text-white font-medium">Question {index + 1}</span>
-                  <Badge variant="outline" className="border-gray-500 text-gray-300 text-xs">
-                    {question.marks} marks
-                  </Badge>
-                  <Badge variant="outline" className="border-gray-500 text-gray-300 text-xs capitalize">
-                    {question.type.replace('-', ' ')}
-                  </Badge>
+      {questions.length === 0 ? (
+        <Card className="bg-[#1E1E1E] border-gray-600">
+          <CardContent className="p-8 text-center">
+            <div className="text-gray-400 mb-4">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg mb-2">No questions yet</p>
+              <p className="text-sm">Start building your test by adding questions</p>
+            </div>
+            <Button
+              onClick={onAddQuestion}
+              className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add First Question
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {questions.map((question, index) => (
+            <Card key={question.id} className="bg-[#1E1E1E] border-gray-600">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    {getQuestionTypeIcon(question.type)}
+                    <span className="text-white font-medium">Question {index + 1}</span>
+                    <Badge variant="outline" className="border-gray-500 text-gray-300 text-xs">
+                      {question.marks} marks
+                    </Badge>
+                    <Badge variant="outline" className="border-gray-500 text-gray-300 text-xs capitalize">
+                      {question.type.replace('-', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditQuestion(
+                        editingQuestionId === question.id ? null : question.id
+                      )}
+                      className="text-gray-300 hover:text-white hover:bg-gray-700"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDuplicateQuestion(question.id)}
+                      className="text-gray-300 hover:text-white hover:bg-gray-700"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDeleteQuestion(question.id)}
+                      className="text-red-400 hover:text-red-300 hover:bg-gray-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEditQuestion(
-                      editingQuestionId === question.id ? null : question.id
-                    )}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDuplicateQuestion(question.id)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDeleteQuestion(question.id)}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
 
-              {editingQuestionId === question.id ? (
-                <QuestionEditor
-                  question={question}
-                  onUpdate={onUpdateQuestion}
-                  onOpenOCR={onOpenOCR}
-                />
-              ) : (
-                <div className="text-gray-300 text-sm">
-                  {question.question}
-                  {question.type === 'mcq' && question.options && (
-                    <div className="mt-2 ml-4">
-                      {question.options.map((option, optIndex) => (
-                        <div key={optIndex} className="text-gray-400 text-xs">
-                          {String.fromCharCode(65 + optIndex)}. {option}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                {editingQuestionId === question.id ? (
+                  <QuestionEditor
+                    question={question}
+                    onUpdate={onUpdateQuestion}
+                    onOpenOCR={onOpenOCR}
+                  />
+                ) : (
+                  <div className="text-gray-300 text-sm">
+                    {question.question}
+                    {question.type === 'mcq' && question.options && (
+                      <div className="mt-2 ml-4">
+                        {question.options.map((option, optIndex) => (
+                          <div key={optIndex} className="text-gray-400 text-xs">
+                            {String.fromCharCode(65 + optIndex)}. {option}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
