@@ -13,6 +13,7 @@ interface QuestionCardProps {
   onUpdate: (id: string, field: keyof EnhancedQuestion, value: any) => void;
   onRemove: (id: string) => void;
   onSelect: (id: string | null) => void;
+  onDuplicate?: (id: string) => void;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -21,8 +22,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   isSelected,
   onUpdate,
   onRemove,
-  onSelect
+  onSelect,
+  onDuplicate
 }) => {
+  const handlePreview = (id: string) => {
+    onSelect(id);
+    // Additional preview logic can be added here
+  };
+
   return (
     <Card className={`bg-[#1E1E1E] border-gray-700 ${isSelected ? 'ring-2 ring-[#38B6FF]' : ''}`}>
       <CardHeader className="pb-4">
@@ -61,6 +68,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         <QuestionActions
           question={question}
           onUpdate={(field, value) => onUpdate(question.id, field, value)}
+          onDuplicate={onDuplicate}
+          onPreview={handlePreview}
         />
       </CardContent>
     </Card>

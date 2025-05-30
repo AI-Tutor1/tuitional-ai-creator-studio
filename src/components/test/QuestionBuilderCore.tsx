@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EnhancedQuestion } from '@/types/question';
+import { useQuestionBuilder } from '@/hooks/useQuestionBuilder';
 import QuestionToolbar from './QuestionToolbar';
 import QuestionCard from './QuestionCard';
 import TestOverviewSidebar from './TestOverviewSidebar';
@@ -12,45 +13,25 @@ interface QuestionBuilderCoreProps {
 }
 
 const QuestionBuilderCore: React.FC<QuestionBuilderCoreProps> = ({ 
-  questions, 
+  questions: initialQuestions, 
   onQuestionsChange 
 }) => {
-  const [previewMode, setPreviewMode] = useState(false);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+  const {
+    questions,
+    selectedQuestionId,
+    previewMode,
+    setSelectedQuestionId,
+    addQuestion,
+    updateQuestion,
+    removeQuestion,
+    duplicateQuestion,
+    togglePreviewMode
+  } = useQuestionBuilder(initialQuestions);
 
-  const addQuestion = () => {
-    const questionCount = questions.filter(q => q.type === 'question').length;
-    const newQuestion: EnhancedQuestion = {
-      id: Date.now().toString(),
-      questionNumber: questionCount + 1,
-      type: 'question',
-      subType: 'mcq',
-      text: '',
-      marks: 1,
-      includeAnswer: false,
-      includeDiagram: false,
-      mcqOptions: [
-        { id: '1', text: '', isCorrect: false },
-        { id: '2', text: '', isCorrect: false },
-        { id: '3', text: '', isCorrect: false },
-        { id: '4', text: '', isCorrect: false }
-      ],
-      createdAt: new Date().toISOString(),
-      version: 1
-    };
-    onQuestionsChange([...questions, newQuestion]);
-  };
-
-  const updateQuestion = (id: string, field: keyof EnhancedQuestion, value: any) => {
-    const updatedQuestions = questions.map(q => 
-      q.id === id ? { ...q, [field]: value, updatedAt: new Date().toISOString() } : q
-    );
-    onQuestionsChange(updatedQuestions);
-  };
-
-  const removeQuestion = (id: string) => {
-    onQuestionsChange(questions.filter(q => q.id !== id));
-  };
+  // Sync changes back to parent
+  React.useEffect(() => {
+    onQuestionsChange(questions);
+  }, [questions, onQuestionsChange]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -58,7 +39,7 @@ const QuestionBuilderCore: React.FC<QuestionBuilderCoreProps> = ({
         <QuestionToolbar
           onAddQuestion={addQuestion}
           previewMode={previewMode}
-          onTogglePreview={() => setPreviewMode(!previewMode)}
+          onTogglePreview={togglePreviewMode}
           questionCount={questions.length}
         />
 
@@ -80,6 +61,7 @@ const QuestionBuilderCore: React.FC<QuestionBuilderCoreProps> = ({
                 onUpdate={updateQuestion}
                 onRemove={removeQuestion}
                 onSelect={setSelectedQuestionId}
+                onDuplicate={duplicateQuestion}
               />
             ))}
           </div>

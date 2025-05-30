@@ -8,9 +8,16 @@ import { EnhancedQuestion } from '@/types/question';
 interface QuestionActionsProps {
   question: EnhancedQuestion;
   onUpdate: (field: keyof EnhancedQuestion, value: any) => void;
+  onDuplicate?: (id: string) => void;
+  onPreview?: (id: string) => void;
 }
 
-const QuestionActions: React.FC<QuestionActionsProps> = ({ question, onUpdate }) => {
+const QuestionActions: React.FC<QuestionActionsProps> = ({ 
+  question, 
+  onUpdate, 
+  onDuplicate,
+  onPreview 
+}) => {
   return (
     <div className="space-y-3 pt-4 border-t border-gray-700">
       <div className="flex items-center justify-between">
@@ -36,6 +43,7 @@ const QuestionActions: React.FC<QuestionActionsProps> = ({ question, onUpdate })
           variant="outline" 
           size="sm"
           className="border-gray-600 text-gray-300 hover:bg-gray-700"
+          onClick={() => onDuplicate?.(question.id)}
         >
           Duplicate
         </Button>
@@ -43,6 +51,7 @@ const QuestionActions: React.FC<QuestionActionsProps> = ({ question, onUpdate })
           variant="outline" 
           size="sm"
           className="border-gray-600 text-gray-300 hover:bg-gray-700"
+          onClick={() => onPreview?.(question.id)}
         >
           Preview
         </Button>
