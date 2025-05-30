@@ -7,23 +7,28 @@ import { Search, Plus, BookOpen, BarChart3 } from 'lucide-react';
 import StatCard from '@/components/shared/StatCard';
 import ActionButtonGroup from '@/components/shared/ActionButtonGroup';
 import TestEditModal from '@/components/test/TestEditModal';
+import CreateTestModal from '@/components/test/CreateTestModal';
 import { mockTests } from '@/data/mockTests';
 import BackButton from '@/components/shared/BackButton';
 
 const TeacherTestBank = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
 
   const handleEditTest = (test) => {
     setSelectedTest(test);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const handleSaveTest = (editedTest) => {
-    // Implement save logic here, e.g., update state or send to API
     console.log('Saving test:', editedTest);
-    setIsModalOpen(false);
+    setIsEditModalOpen(false);
+  };
+
+  const handleCreateTest = () => {
+    setIsCreateModalOpen(true);
   };
 
   const tests = mockTests;
@@ -67,7 +72,10 @@ const TeacherTestBank = () => {
                 className="bg-[#2A2A2A] border-gray-700 text-white placeholder-gray-400"
               />
             </div>
-            <Button className="w-full bg-[#38B6FF] hover:bg-[#2A9DE8] text-white">
+            <Button 
+              className="w-full bg-[#38B6FF] hover:bg-[#2A9DE8] text-white"
+              onClick={handleCreateTest}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create New Test
             </Button>
@@ -108,13 +116,19 @@ const TeacherTestBank = () => {
       </div>
 
       {/* Test Edit Modal */}
-      {isModalOpen && selectedTest && (
+      {isEditModalOpen && selectedTest && (
         <TestEditModal
           test={selectedTest}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setIsEditModalOpen(false)}
           onSave={handleSaveTest}
         />
       )}
+
+      {/* Create Test Modal */}
+      <CreateTestModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };

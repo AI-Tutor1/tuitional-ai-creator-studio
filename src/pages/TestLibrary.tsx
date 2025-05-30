@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,9 +17,15 @@ import {
   Copy
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
+import CreateTestModal from '@/components/test/CreateTestModal';
 
 const TestLibrary = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleCreateTest = () => {
+    setIsCreateModalOpen(true);
+  };
 
   // Mock data for tests
   const tests = [
@@ -107,7 +114,10 @@ const TestLibrary = () => {
             <Filter className="mr-2 h-4 w-4" />
             Filters
           </Button>
-          <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
+          <Button 
+            className="bg-[#007AFF] hover:bg-[#0056CC]"
+            onClick={handleCreateTest}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Test
           </Button>
@@ -163,6 +173,12 @@ const TestLibrary = () => {
           ))}
         </div>
       </div>
+
+      {/* Create Test Modal */}
+      <CreateTestModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };
