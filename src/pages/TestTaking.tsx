@@ -3,14 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast"
-import { Clock, ChevronLeft, ChevronRight, Flag, CheckCircle } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
+import EnhancedAnswerEditor from '@/components/test/EnhancedAnswerEditor';
 
 const TestTaking = () => {
   const { testId } = useParams<{ testId: string }>();
@@ -235,51 +233,20 @@ const TestTaking = () => {
                   <p className="text-gray-800 text-lg leading-relaxed">{currentQuestion.text}</p>
                 </div>
 
-                {/* Answer Section */}
+                {/* Enhanced Answer Section */}
                 <div className="space-y-4">
-                  {currentQuestion.options ? (
-                    // Multiple Choice
-                    <div className="space-y-3">
-                      <Label className="text-base font-medium text-gray-700">Select your answer:</Label>
-                      {currentQuestion.options.map((option, index) => (
-                        <div key={index} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 transition-colors">
-                          <Checkbox
-                            id={`question-${currentQuestion.id}-option-${index}`}
-                            checked={answers[currentQuestionIndex] === option}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                handleAnswerChange(currentQuestionIndex, option);
-                              } else {
-                                handleAnswerChange(currentQuestionIndex, '');
-                              }
-                            }}
-                            className="h-5 w-5"
-                          />
-                          <Label 
-                            htmlFor={`question-${currentQuestion.id}-option-${index}`} 
-                            className="flex-1 text-base cursor-pointer"
-                          >
-                            <span className="font-medium text-gray-600 mr-2">
-                              {String.fromCharCode(65 + index)}.
-                            </span>
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    // Written Answer
-                    <div className="space-y-3">
-                      <Label className="text-base font-medium text-gray-700">Your answer:</Label>
-                      <textarea
-                        placeholder="Type your answer here..."
-                        value={answers[currentQuestionIndex] || ''}
-                        onChange={(e) => handleAnswerChange(currentQuestionIndex, e.target.value)}
-                        className="w-full min-h-[120px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent resize-vertical"
-                        rows={4}
-                      />
-                    </div>
-                  )}
+                  <EnhancedAnswerEditor
+                    value={answers[currentQuestionIndex] || ''}
+                    onChange={(answer) => handleAnswerChange(currentQuestionIndex, answer)}
+                    questionType={currentQuestion.options ? 'mcq' : 'written'}
+                    options={currentQuestion.options}
+                    questionId={currentQuestion.id}
+                    placeholder={
+                      currentQuestion.options 
+                        ? "Select your answer from the options above"
+                        : `Write your answer for this ${currentQuestion.marks}-mark question...`
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
