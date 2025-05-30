@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BackButton } from '@/components/shared/BackButton';
 import {
   Search,
   Filter,
@@ -211,35 +212,30 @@ const EnhancedQuestionBank: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Enhanced Question Bank</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Advanced question management with smart analytics
-              </p>
-            </div>
-            <div className="flex space-x-3">
-              <Button variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-              <Button variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
-              <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Question
-              </Button>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <BackButton to="/" label="Back to Dashboard" />
+        
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Enhanced Question Bank</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Advanced question management with smart analytics
+          </p>
+          <div className="flex space-x-3 mt-4">
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Button>
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Question
+            </Button>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Filters Sidebar */}
           <div className="w-80 bg-white rounded-lg shadow-sm border h-fit">

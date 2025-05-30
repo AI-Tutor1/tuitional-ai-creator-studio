@@ -1,251 +1,168 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
-  Plus, 
   Search, 
   Filter, 
-  Eye, 
-  Edit, 
-  Trash2,
-  Clock,
-  Users,
-  FileText,
-  MoreVertical
+  Plus, 
+  BookOpen, 
+  Clock, 
+  Users, 
+  Star,
+  Play,
+  Edit,
+  Copy
 } from 'lucide-react';
-import CreateTestModal from '@/components/test/CreateTestModal';
-import Navigation from '@/components/Navigation';
-
-interface Test {
-  id: string;
-  title: string;
-  code: string;
-  subject: string;
-  grade: string;
-  questionCount: number;
-  createdBy: string;
-  createdDate: string;
-  status: 'Draft' | 'Published';
-  duration: number;
-}
+import BackButton from '@/components/shared/BackButton';
 
 const TestLibrary = () => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    subject: '',
-    grade: '',
-    curriculum: '',
-    status: '',
-    creator: ''
-  });
 
-  const mockTests: Test[] = [
+  // Mock data for tests
+  const tests = [
     {
-      id: '1',
-      title: 'Photosynthesis and Plant Biology',
-      code: 'BIO-101-A',
+      id: 1,
+      title: 'Biology Chapter 5: Photosynthesis',
+      description: 'Comprehensive test covering light and dark reactions',
       subject: 'Biology',
       grade: '10th',
-      questionCount: 25,
-      createdBy: 'Dr. Sarah Johnson',
-      createdDate: '2024-01-15',
-      status: 'Published',
-      duration: 90
+      duration: 60,
+      questions: 25,
+      difficulty: 'Medium',
+      attempts: 127,
+      averageScore: 78.5,
+      lastUsed: '2024-01-15',
+      tags: ['Photosynthesis', 'Plant Biology', 'IGCSE']
     },
     {
-      id: '2',
-      title: 'Algebraic Equations Fundamentals',
-      code: 'MATH-201-B',
-      subject: 'Mathematics',
-      grade: '9th',
-      questionCount: 18,
-      createdBy: 'Prof. Michael Chen',
-      createdDate: '2024-01-12',
-      status: 'Draft',
-      duration: 60
-    },
-    {
-      id: '3',
-      title: 'Chemical Reactions and Stoichiometry',
-      code: 'CHEM-301-C',
+      id: 2,
+      title: 'Chemistry: Chemical Bonding',
+      description: 'Test on ionic, covalent, and metallic bonds',
       subject: 'Chemistry',
       grade: '11th',
-      questionCount: 30,
-      createdBy: 'Dr. Emma Wilson',
-      createdDate: '2024-01-10',
-      status: 'Published',
-      duration: 120
+      duration: 75,
+      questions: 30,
+      difficulty: 'Hard',
+      attempts: 89,
+      averageScore: 65.2,
+      lastUsed: '2024-01-20',
+      tags: ['Chemical Bonding', 'Ionic', 'Covalent']
+    },
+    {
+      id: 3,
+      title: 'Physics: Mechanics and Motion',
+      description: 'Test covering Newton\'s laws and kinematics',
+      subject: 'Physics',
+      grade: '9th',
+      duration: 50,
+      questions: 20,
+      difficulty: 'Easy',
+      attempts: 155,
+      averageScore: 85.0,
+      lastUsed: '2024-01-22',
+      tags: ['Mechanics', 'Motion', 'Newton\'s Laws']
+    },
+    {
+      id: 4,
+      title: 'Mathematics: Algebra II',
+      description: 'Test on quadratic equations and polynomials',
+      subject: 'Mathematics',
+      grade: '12th',
+      duration: 90,
+      questions: 40,
+      difficulty: 'Medium',
+      attempts: 63,
+      averageScore: 72.8,
+      lastUsed: '2024-01-25',
+      tags: ['Algebra', 'Quadratic Equations', 'Polynomials']
     }
   ];
 
   return (
-    <div className="min-h-screen bg-[#1E1E1E]">
-      <Navigation />
-      
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Test Library</h1>
-            <p className="text-gray-400">Manage and organize your test assessments</p>
+        <BackButton to="/" label="Back to Dashboard" />
+        
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Test Library</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Browse and manage your test collection
+          </p>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search tests by title, subject, or tags..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-          <Button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white px-6 py-3 text-lg"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Create New Test
+          <Button variant="outline">
+            <Filter className="mr-2 h-4 w-4" />
+            Filters
+          </Button>
+          <Button className="bg-[#007AFF] hover:bg-[#0056CC]">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Test
           </Button>
         </div>
 
-        {/* Filters and Search */}
-        <Card className="bg-[#2A2A2A] border-gray-700 mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
-              <div className="lg:col-span-2">
-                <Label htmlFor="search" className="text-white mb-2 block">Search Tests</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="search"
-                    placeholder="Search by title or code..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-[#1E1E1E] border-gray-600 text-white"
-                  />
+        {/* Tests Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tests.map((test) => (
+            <Card key={test.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-lg font-semibold">{test.title}</CardTitle>
+                <div className="space-x-1">
+                  <Button variant="ghost" size="sm">
+                    <Play className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-              
-              <div>
-                <Label className="text-white mb-2 block">Subject</Label>
-                <Select value={filters.subject} onValueChange={(value) => setFilters({...filters, subject: value})}>
-                  <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
-                    <SelectValue placeholder="All Subjects" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                    <SelectItem value="biology">Biology</SelectItem>
-                    <SelectItem value="chemistry">Chemistry</SelectItem>
-                    <SelectItem value="physics">Physics</SelectItem>
-                    <SelectItem value="mathematics">Mathematics</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-white mb-2 block">Grade</Label>
-                <Select value={filters.grade} onValueChange={(value) => setFilters({...filters, grade: value})}>
-                  <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
-                    <SelectValue placeholder="All Grades" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                    <SelectItem value="9th">9th Grade</SelectItem>
-                    <SelectItem value="10th">10th Grade</SelectItem>
-                    <SelectItem value="11th">11th Grade</SelectItem>
-                    <SelectItem value="12th">12th Grade</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-white mb-2 block">Status</Label>
-                <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
-                  <SelectTrigger className="bg-[#1E1E1E] border-gray-600 text-white">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#2A2A2A] border-gray-600">
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Button variant="outline" className="w-full border-[#38B6FF] text-[#38B6FF] hover:bg-[#38B6FF] hover:text-white">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Apply Filters
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Test Table */}
-        <Card className="bg-[#2A2A2A] border-gray-700">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-gray-700">
-                  <TableHead className="text-gray-300">Test Name</TableHead>
-                  <TableHead className="text-gray-300">Code</TableHead>
-                  <TableHead className="text-gray-300">Subject</TableHead>
-                  <TableHead className="text-gray-300">Grade</TableHead>
-                  <TableHead className="text-gray-300">Questions</TableHead>
-                  <TableHead className="text-gray-300">Duration</TableHead>
-                  <TableHead className="text-gray-300">Created By</TableHead>
-                  <TableHead className="text-gray-300">Status</TableHead>
-                  <TableHead className="text-gray-300">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockTests.map((test) => (
-                  <TableRow key={test.id} className="border-gray-700 hover:bg-[#1E1E1E]">
-                    <TableCell className="text-white font-medium">{test.title}</TableCell>
-                    <TableCell className="text-gray-300 font-mono">{test.code}</TableCell>
-                    <TableCell className="text-gray-300">{test.subject}</TableCell>
-                    <TableCell className="text-gray-300">{test.grade}</TableCell>
-                    <TableCell className="text-gray-300">
-                      <div className="flex items-center">
-                        <FileText className="mr-1 h-4 w-4" />
-                        {test.questionCount}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      <div className="flex items-center">
-                        <Clock className="mr-1 h-4 w-4" />
-                        {test.duration}m
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-gray-300">{test.createdBy}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={test.status === 'Published' ? 'default' : 'secondary'}
-                        className={test.status === 'Published' ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'}
-                      >
-                        {test.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-3 line-clamp-2">{test.description}</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Badge variant="secondary">{test.subject}</Badge>
+                  <Badge variant="secondary">Grade {test.grade}</Badge>
+                  {test.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline">{tag}</Badge>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center">
+                    <Clock className="mr-2 h-4 w-4 text-gray-400" />
+                    {test.duration} minutes
+                  </div>
+                  <div className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4 text-gray-400" />
+                    {test.questions} questions
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="mr-2 h-4 w-4 text-gray-400" />
+                    {test.attempts} attempts
+                  </div>
+                  <div className="flex items-center">
+                    <Star className="mr-2 h-4 w-4 text-gray-400" />
+                    {test.averageScore}% average
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-
-      <CreateTestModal 
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
     </div>
   );
 };
