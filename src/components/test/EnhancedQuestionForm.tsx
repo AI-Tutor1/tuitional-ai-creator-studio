@@ -21,7 +21,7 @@ import {
 import { EnhancedQuestion } from '@/types/question';
 import MathTextEditor from './MathTextEditor';
 import TeacherOCR from './TeacherOCR';
-import Calculator from './Calculator';
+import CalculatorComponent from './Calculator';
 import ImageUpload from './ImageUpload';
 
 interface EnhancedQuestionFormProps {
@@ -342,7 +342,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
       {/* Floating Calculator */}
       {showCalculator && (
         <div className="fixed top-20 right-4 z-50">
-          <Calculator onClose={() => setShowCalculator(false)} />
+          <CalculatorComponent onClose={() => setShowCalculator(false)} />
         </div>
       )}
 
