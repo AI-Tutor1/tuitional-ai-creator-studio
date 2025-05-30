@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -166,7 +165,8 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) =>
       .map((q, index) => ({
         ...q,
         id: Date.now().toString() + index,
-        questionNumber: questions.length + index + 1
+        questionNumber: questions.length + index + 1,
+        markingScheme: q.markingScheme || `Sample marking scheme for ${q.subType} question worth ${q.marks} marks.`
       }));
     
     setQuestions([...questions, ...questionsToAdd]);
@@ -435,13 +435,28 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) =>
           </div>
         )}
 
-        {/* Step 3: Question Builder */}
+        {/* Step 3: Enhanced Question Builder */}
         {activeStep === 3 && (
           <div className="space-y-6">
+            <div className="bg-[#2A2A2A] border border-gray-700 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-white font-medium">Enhanced Question Builder</h3>
+                <div className="flex items-center space-x-4 text-sm text-gray-300">
+                  <span>Questions: {questions.length}</span>
+                  <span>Total Marks: {questions.reduce((total, q) => total + (q.marks || 0), 0)}</span>
+                  <span>Est. Time: {Math.round(questions.reduce((total, q) => total + (q.metadata?.estimatedTime || 60), 0) / 60)} min</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm">
+                ✨ Features: OCR Text Extraction • Scientific Calculator • Math Editor • Image Upload • Marking Schemes
+              </p>
+            </div>
+            
             <QuestionBuilder 
               questions={questions} 
               onQuestionsChange={setQuestions}
             />
+            
             <div className="flex justify-between">
               <Button 
                 variant="outline"
@@ -452,7 +467,7 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose }) =>
               </Button>
               <Button 
                 onClick={() => setActiveStep(4)}
-                className="bg-[#38B6FF] hover:bg-[#2A9DE8]"
+                className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white"
                 disabled={questions.length === 0}
               >
                 Review & Publish

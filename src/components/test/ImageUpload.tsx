@@ -1,35 +1,43 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Upload, X, Eye } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Image, Upload, X, Eye } from 'lucide-react';
 
 interface ImageUploadProps {
-  onImageUpload: (imageData: { url: string; alt: string; caption?: string }) => void;
-  currentImage?: { url: string; alt: string; caption?: string };
+  onImageUpload: (imageData: string) => void;
+  currentImage?: string;
   onRemoveImage: () => void;
+  maxSizeMB?: number;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageUpload,
   currentImage,
-  onRemoveImage
+  onRemoveImage,
+  maxSizeMB = 5
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [altText, setAltText] = useState(currentImage?.alt || '');
-  const [caption, setCaption] = useState(currentImage?.caption || '');
+  const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+  const handleFileSelect = (file: File) => {
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      alert(`File size must be less than ${maxSizeMB}MB`);
+      return;
+    }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      onImageUpload(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -38,181 +46,113 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFileSelect(files[0]);
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFileSelect(files[0]);
     }
   };
-
-  const handleFileUpload = (file: File) => {
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const url = e.target?.result as string;
-        onImageUpload({
-          url,
-          alt: altText || file.name,
-          caption
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleAltTextChange = (newAltText: string) => {
-    setAltText(newAltText);
-    if (currentImage) {
-      onImageUpload({
-        ...currentImage,
-        alt: newAltText
-      });
-    }
-  };
-
-  const handleCaptionChange = (newCaption: string) => {
-    setCaption(newCaption);
-    if (currentImage) {
-      onImageUpload({
-        ...currentImage,
-        caption: newCaption
-      });
-    }
-  };
-
-  if (currentImage) {
-    return (
-      <div className="space-y-3">
-        <div className="relative">
-          <img
-            src={currentImage.url}
-            alt={currentImage.alt}
-            className="w-full h-32 object-cover rounded-lg border border-gray-600"
-          />
-          <div className="absolute top-2 right-2 flex space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsPreviewOpen(true)}
-              className="bg-black/50 hover:bg-black/70 text-white"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRemoveImage}
-              className="bg-black/50 hover:bg-black/70 text-white"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <div>
-            <Label className="text-white text-sm">Alt Text</Label>
-            <Input
-              value={altText}
-              onChange={(e) => handleAltTextChange(e.target.value)}
-              placeholder="Describe the image for accessibility"
-              className="bg-[#2A2A2A] border-gray-600 text-white text-sm"
-            />
-          </div>
-          <div>
-            <Label className="text-white text-sm">Caption (optional)</Label>
-            <Input
-              value={caption}
-              onChange={(e) => handleCaptionChange(e.target.value)}
-              placeholder="Image caption"
-              className="bg-[#2A2A2A] border-gray-600 text-white text-sm"
-            />
-          </div>
-        </div>
-
-        {/* Preview Modal */}
-        {isPreviewOpen && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="max-w-4xl max-h-4xl p-4">
-              <div className="relative">
-                <img
-                  src={currentImage.url}
-                  alt={currentImage.alt}
-                  className="max-w-full max-h-full object-contain"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsPreviewOpen(false)}
-                  className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              {currentImage.caption && (
-                <p className="text-white text-center mt-2">{currentImage.caption}</p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-3">
-      <div
-        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-          isDragging
-            ? 'border-[#38B6FF] bg-[#38B6FF]/10'
-            : 'border-gray-600 hover:border-gray-500'
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-        <p className="text-gray-400 text-sm">
-          Click to upload or drag and drop
-        </p>
-        <p className="text-gray-500 text-xs">
-          PNG, JPG, SVG up to 5MB
-        </p>
-      </div>
+      {currentImage ? (
+        <div className="relative">
+          <Card className="p-4 bg-[#2A2A2A] border-gray-600">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-300">Image uploaded</span>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPreview(true)}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  Preview
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRemoveImage}
+                  className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Remove
+                </Button>
+              </div>
+            </div>
+            <img
+              src={currentImage}
+              alt="Uploaded"
+              className="w-full max-h-32 object-contain rounded bg-gray-800"
+            />
+          </Card>
+        </div>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+            isDragging
+              ? 'border-[#38B6FF] bg-blue-50/10'
+              : 'border-gray-600 hover:border-gray-500'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+        >
+          <Image className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+          <p className="text-sm text-gray-400 mb-2">
+            Drag and drop an image here, or click to select
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+          >
+            <Upload className="h-4 w-4 mr-1" />
+            Select Image
+          </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            Supports JPG, PNG, GIF (max {maxSizeMB}MB)
+          </p>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        onChange={handleFileSelect}
+        onChange={handleFileInputChange}
         className="hidden"
       />
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label className="text-white text-sm">Alt Text</Label>
-          <Input
-            value={altText}
-            onChange={(e) => setAltText(e.target.value)}
-            placeholder="Describe the image"
-            className="bg-[#2A2A2A] border-gray-600 text-white text-sm"
-          />
+      {/* Image Preview Modal */}
+      {showPreview && currentImage && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-4xl max-h-[90vh] overflow-hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPreview(false)}
+              className="absolute top-2 right-2 z-10 bg-black/50 text-white hover:bg-black/70"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <img
+              src={currentImage}
+              alt="Preview"
+              className="max-w-full max-h-full object-contain rounded"
+            />
+          </div>
         </div>
-        <div>
-          <Label className="text-white text-sm">Caption</Label>
-          <Input
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Optional caption"
-            className="bg-[#2A2A2A] border-gray-600 text-white text-sm"
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };

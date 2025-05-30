@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EnhancedQuestion } from '@/types/question';
 import QuestionHeader from './QuestionHeader';
-import QuestionForm from './QuestionForm';
+import EnhancedQuestionForm from './EnhancedQuestionForm';
 import QuestionActions from './QuestionActions';
 
 interface QuestionCardProps {
@@ -27,7 +27,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const handlePreview = (id: string) => {
     onSelect(id);
-    // Additional preview logic can be added here
   };
 
   return (
@@ -43,7 +42,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
       <CardContent className="space-y-4">
         {!previewMode ? (
-          <QuestionForm
+          <EnhancedQuestionForm
             question={question}
             onUpdate={(field, value) => onUpdate(question.id, field, value)}
           />
@@ -55,11 +54,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 {question.mcqOptions.map((option, index) => (
                   <div 
                     key={option.id} 
-                    className={`p-2 rounded ${option.isCorrect ? 'bg-green-600/20' : 'bg-gray-700'}`}
+                    className={`p-2 rounded ${option.isCorrect ? 'bg-green-600/20 border border-green-500' : 'bg-gray-700'}`}
                   >
                     {String.fromCharCode(65 + index)}. {option.text}
+                    {option.isCorrect && <span className="ml-2 text-green-400">✓ Correct</span>}
                   </div>
                 ))}
+              </div>
+            )}
+            {question.markingScheme && (
+              <div className="mt-4 p-3 bg-blue-600/20 border border-blue-500 rounded">
+                <h4 className="text-blue-400 font-medium mb-2">Marking Scheme:</h4>
+                <p className="text-gray-300 text-sm whitespace-pre-wrap">{question.markingScheme}</p>
               </div>
             )}
           </div>
