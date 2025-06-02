@@ -31,7 +31,7 @@ export interface EvaluatedTest {
   status: 'passed' | 'failed' | 'needs_review';
   correctCount: number;
   incorrectCount: number;
-  skippedCount: integer;
+  skippedCount: number;
   totalQuestions: number;
   instructorCommentsAvailable: boolean;
   canRequestRegrade: boolean;
