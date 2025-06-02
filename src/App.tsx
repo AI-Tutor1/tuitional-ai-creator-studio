@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -15,6 +14,7 @@ import StudentTestDashboard from './pages/StudentTestDashboard';
 import TeacherTestAnalytics from './pages/TeacherTestAnalytics';
 import EvaluatedTests from './pages/EvaluatedTests';
 import TestDetail from './pages/TestDetail';
+import CreatedTestDetail from './pages/CreatedTestDetail';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -24,6 +24,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/tests" element={<TestLibrary />} />
         <Route path="/teacher-test-bank" element={<TeacherTestBank />} />
+        <Route path="/teacher-test-bank/:testId" element={<CreatedTestDetail />} />
         <Route path="/student-test-bank" element={<StudentTestBank />} />
         <Route path="/test-taking/:testId" element={<TestTaking />} />
         <Route path="/test-results/:testId" element={<TestResults />} />
