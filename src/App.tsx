@@ -13,6 +13,7 @@ import TestResults from './pages/TestResults';
 import PerformanceTrends from './pages/PerformanceTrends';
 import StudentTestDashboard from './pages/StudentTestDashboard';
 import TeacherTestAnalytics from './pages/TeacherTestAnalytics';
+import EvaluatedTests from './pages/EvaluatedTests';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/questions" element={<EnhancedQuestionBank />} />
         <Route path="/questions/legacy" element={<QuestionBank />} />
         <Route path="/student-tests" element={<StudentTests />} />
+        <Route path="/evaluated-tests" element={<EvaluatedTests />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
