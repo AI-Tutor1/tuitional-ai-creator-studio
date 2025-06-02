@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,8 @@ const EvaluatedTestCard: React.FC<EvaluatedTestCardProps> = ({
   onShare,
   onRequestRegrade
 }) => {
+  const navigate = useNavigate();
+
   const getStatusIcon = () => {
     switch (test.status) {
       case 'passed':
@@ -44,6 +47,10 @@ const EvaluatedTestCard: React.FC<EvaluatedTestCardProps> = ({
       default:
         return null;
     }
+  };
+
+  const handleReview = () => {
+    navigate(`/evaluated-tests/${test.testId}`);
   };
 
   return (
@@ -101,7 +108,7 @@ const EvaluatedTestCard: React.FC<EvaluatedTestCardProps> = ({
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 pt-2">
           <Button
-            onClick={() => onReview(test)}
+            onClick={handleReview}
             className="bg-[#38B6FF] hover:bg-[#2A9DE8] text-white flex-1 sm:flex-none"
           >
             <Eye className="mr-2 h-4 w-4" />
