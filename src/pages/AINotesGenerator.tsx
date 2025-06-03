@@ -1,12 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { 
   Select,
   SelectContent,
@@ -43,6 +40,10 @@ interface GeneratedNote {
 }
 
 interface FormData {
+  subject: string;
+  level: 'Core' | 'Extended' | 'Higher';
+  gradeRange: string;
+  topic: string;
   llmPrompt: string;
   additionalGuidance: string;
   sourceType: 'none' | 'text' | 'document';
@@ -58,6 +59,10 @@ interface FormData {
 
 const AINotesGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
+    subject: '',
+    level: 'Core',
+    gradeRange: '',
+    topic: '',
     llmPrompt: '',
     additionalGuidance: '',
     sourceType: 'none',
@@ -74,10 +79,9 @@ const AINotesGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedNotes, setGeneratedNotes] = useState<GeneratedNote[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
 
   const canGenerate = () => {
-    return formData.llmPrompt.trim().length > 0;
+    return formData.subject.trim().length > 0 && formData.topic.trim().length > 0;
   };
 
   const handleGenerate = async () => {
@@ -88,66 +92,49 @@ const AINotesGenerator: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Mock generated notes based on LLM prompt
+      // Mock generated notes based on subject and topic
       const mockNotes: GeneratedNote[] = [
         {
           sectionId: 'ai-note-1',
-          sectionTitle: 'Cellular Respiration Overview',
+          sectionTitle: `${formData.topic} - Overview`,
           content: [
-            'Cellular respiration is the metabolic process by which cells harvest energy from food molecules.',
-            'Occurs in three main stages: glycolysis, citric acid cycle, and electron transport chain.',
-            'Primary purpose is to generate ATP (adenosine triphosphate) for cellular energy needs.',
-            'Overall equation: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP'
+            `${formData.topic} is a fundamental concept in ${formData.subject}.`,
+            `This topic is essential for ${formData.level} level ${formData.gradeRange} students.`,
+            'Understanding this concept requires careful attention to key principles.',
+            'Applications of this knowledge span multiple areas of study.'
           ],
           importance: 5,
-          tags: ['Definition', 'Process', 'Equation'],
+          tags: ['Definition', 'Overview'],
           starred: false,
           customTags: []
         },
         {
           sectionId: 'ai-note-2',
-          sectionTitle: 'Glycolysis',
+          sectionTitle: `Key Concepts in ${formData.topic}`,
           content: [
-            'First stage of cellular respiration occurring in the cytoplasm.',
-            'Glucose (6-carbon) is broken down into two pyruvate molecules (3-carbon each).',
-            'Net gain of 2 ATP and 2 NADH molecules per glucose.',
-            'Does not require oxygen (anaerobic process).',
-            'Key enzymes: hexokinase, phosphofructokinase, pyruvate kinase.'
+            'Primary concepts form the foundation of understanding.',
+            'Secondary principles build upon basic knowledge.',
+            'Advanced applications demonstrate practical usage.',
+            'Critical thinking skills are developed through practice.'
           ],
           importance: 4,
-          tags: ['Process', 'Location', 'Example'],
+          tags: ['Concept', 'Application'],
           starred: false,
           customTags: []
         },
         {
           sectionId: 'ai-note-3',
-          sectionTitle: 'Citric Acid Cycle (Krebs Cycle)',
+          sectionTitle: `${formData.topic} - Examples and Practice`,
           content: [
-            'Second stage occurring in the mitochondrial matrix.',
-            'Pyruvate is converted to acetyl-CoA before entering the cycle.',
-            'One turn of the cycle produces: 3 NADH, 1 FADH₂, 1 ATP, 2 CO₂.',
-            'Cycle turns twice per glucose molecule (since glucose produces 2 pyruvate).',
-            'Key regulatory enzyme: citrate synthase.'
+            'Real-world examples illustrate theoretical concepts.',
+            'Practice problems reinforce learning objectives.',
+            'Step-by-step solutions demonstrate methodology.',
+            'Common mistakes and how to avoid them.'
           ],
           importance: 4,
-          tags: ['Process', 'Location', 'Term'],
-          starred: false,
-          customTags: []
-        },
-        {
-          sectionId: 'ai-note-4',
-          sectionTitle: 'Electron Transport Chain',
-          content: [
-            'Final stage located in the inner mitochondrial membrane.',
-            'NADH and FADH₂ donate electrons to protein complexes.',
-            'Creates proton gradient across inner membrane (chemiosmosis).',
-            'ATP synthase uses gradient to produce approximately 32 ATP molecules.',
-            'Oxygen serves as final electron acceptor, forming water.'
-          ],
-          importance: 5,
-          tags: ['Process', 'Location', 'Equation'],
+          tags: ['Example', 'Practice'],
           starred: false,
           customTags: []
         }
@@ -155,7 +142,7 @@ const AINotesGenerator: React.FC = () => {
 
       setGeneratedNotes(mockNotes);
     } catch (err) {
-      setError('Unable to generate notes with the provided prompt. Please try again.');
+      setError('Unable to generate notes. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -170,62 +157,157 @@ const AINotesGenerator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Page Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">AI-Driven Notes Generator</h1>
-            <p className="text-sm text-gray-500 mt-1">Craft a custom prompt and guidance to generate structured notes.</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-8 py-12">
+          <div className="text-center">
+            <h1 className="text-4xl font-semibold text-gray-900 tracking-tight">
+              Notes Generator
+            </h1>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Create comprehensive educational notes for IGCSE subjects and topics
+            </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowHelp(true)}
-            className="text-blue-600 hover:text-blue-700"
-            aria-label="Open help on using the AI-Driven Notes Generator"
-          >
-            <HelpCircle className="h-6 w-6" />
-          </Button>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
-      <main className="px-6 py-4 space-y-4">
-        {/* LLM Prompt & Guidance Form */}
-        <PromptGuidanceForm
-          formData={formData}
-          onFormDataChange={updateFormData}
-          onGenerate={handleGenerate}
-          canGenerate={canGenerate()}
-          isGenerating={isGenerating}
-        />
+      <div className="max-w-6xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Generate Form */}
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+                Generate Educational Notes
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Fill in the details below to generate book-style educational notes for IGCSE students.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+              <div className="space-y-6">
+                {/* Subject */}
+                <div>
+                  <Label htmlFor="subject" className="text-base font-medium text-gray-900 mb-3 block">
+                    Subject
+                  </Label>
+                  <Input
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => updateFormData({ subject: e.target.value })}
+                    placeholder="e.g. Mathematics, Physics, Biology"
+                    className="h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
+                  />
+                </div>
+
+                {/* Level */}
+                <div>
+                  <Label className="text-base font-medium text-gray-900 mb-3 block">
+                    Level
+                  </Label>
+                  <Select
+                    value={formData.level}
+                    onValueChange={(value: 'Core' | 'Extended' | 'Higher') =>
+                      updateFormData({ level: value })
+                    }
+                  >
+                    <SelectTrigger className="h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Core">Core</SelectItem>
+                      <SelectItem value="Extended">Extended</SelectItem>
+                      <SelectItem value="Higher">Higher</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Grade Range */}
+                <div>
+                  <Label htmlFor="gradeRange" className="text-base font-medium text-gray-900 mb-3 block">
+                    Grade Range
+                  </Label>
+                  <Input
+                    id="gradeRange"
+                    value={formData.gradeRange}
+                    onChange={(e) => updateFormData({ gradeRange: e.target.value })}
+                    placeholder="e.g. 9-1, A*-G"
+                    className="h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
+                  />
+                </div>
+
+                {/* Topic */}
+                <div>
+                  <Label htmlFor="topic" className="text-base font-medium text-gray-900 mb-3 block">
+                    Topic
+                  </Label>
+                  <Input
+                    id="topic"
+                    value={formData.topic}
+                    onChange={(e) => updateFormData({ topic: e.target.value })}
+                    placeholder="e.g. Quadratic Equations, Light, Photosynthesis"
+                    className="h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
+                  />
+                </div>
+
+                {/* Generate Button */}
+                <Button
+                  onClick={handleGenerate}
+                  disabled={!canGenerate() || isGenerating}
+                  className="w-full h-14 text-base font-semibold bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200"
+                >
+                  Generate Notes
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes Preview */}
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+                Notes Preview
+              </h2>
+            </div>
+
+            {generatedNotes.length > 0 ? (
+              <AINotesResults
+                notes={generatedNotes}
+                onNotesChange={updateNotes}
+              />
+            ) : (
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+                <div className="text-6xl mb-4">📝</div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Your notes will appear here
+                </h3>
+                <p className="text-gray-500">
+                  Fill out the form and click "Generate Notes" to get started.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Error Banner */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mx-6" role="alert">
-            <div className="flex items-center">
-              <div className="text-red-600 text-sm">{error}</div>
+          <div className="mt-8 bg-red-50 border border-red-200 rounded-xl p-4" role="alert">
+            <div className="flex items-center justify-between">
+              <div className="text-red-700 text-sm">{error}</div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleGenerate}
-                className="ml-auto text-blue-600 hover:text-blue-700 underline"
+                className="text-blue-600 hover:text-blue-700 underline"
               >
                 Retry
               </Button>
             </div>
           </div>
         )}
-
-        {/* Generated Notes */}
-        {generatedNotes.length > 0 && (
-          <AINotesResults
-            notes={generatedNotes}
-            onNotesChange={updateNotes}
-          />
-        )}
-      </main>
+      </div>
 
       {/* Loading Overlay */}
       {isGenerating && <LoadingOverlay />}

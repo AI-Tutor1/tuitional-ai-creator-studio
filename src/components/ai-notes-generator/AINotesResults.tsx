@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,90 +136,76 @@ const AINotesResults: React.FC<AINotesResultsProps> = ({ notes, onNotesChange })
     // In real implementation, this would call the export API
   };
 
-  const getSortLabel = (criterion: string) => {
-    switch (criterion) {
-      case 'importance_desc': return 'Importance (High → Low)';
-      case 'importance_asc': return 'Importance (Low → High)';
-      case 'alpha_asc': return 'Alphabetical (A → Z)';
-      case 'alpha_desc': return 'Alphabetical (Z → A)';
-      case 'by_tag': return 'By Tag (Group by category)';
-      case 'starred_first': return 'Starred First';
-      default: return 'Sort by...';
-    }
-  };
-
   return (
-    <div className="bg-white border border-gray-200 rounded-lg mx-6 p-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Results Header */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Generated Notes</h2>
-        
-        <div className="flex-1" />
-
-        {/* Search Within Notes */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search notes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-60 bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-            aria-label="Search within generated notes"
-          />
-        </div>
-
-        {/* Sort By Dropdown */}
-        <Select value={sortCriterion} onValueChange={setSortCriterion}>
-          <SelectTrigger className="w-48 bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
-            <SelectValue>{getSortLabel(sortCriterion)}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="importance_desc">Importance (High → Low)</SelectItem>
-            <SelectItem value="importance_asc">Importance (Low → High)</SelectItem>
-            <SelectItem value="alpha_asc">Alphabetical (A → Z)</SelectItem>
-            <SelectItem value="alpha_desc">Alphabetical (Z → A)</SelectItem>
-            <SelectItem value="by_tag">By Tag (Group by category)</SelectItem>
-            <SelectItem value="starred_first">Starred First</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Filter by Tag Button */}
-        <div className="relative">
-          <Button
-            variant="outline"
-            onClick={() => setShowTagFilter(!showTagFilter)}
-            className="border-blue-600 text-blue-600 hover:bg-blue-50"
-            aria-label="Filter notes by tags"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filter by Tag
-          </Button>
-          
-          {showTagFilter && (
-            <TagFilterPanel
-              allTags={allTags}
-              selectedTags={filteredTags}
-              onTagsChange={setFilteredTags}
-              onClose={() => setShowTagFilter(false)}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex flex-col space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
             />
-          )}
-        </div>
+          </div>
 
-        {/* Export Button */}
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          className="border-blue-600 text-blue-600 hover:bg-blue-50"
-          aria-label="Export generated notes to PDF"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export as PDF
-        </Button>
+          {/* Controls */}
+          <div className="flex flex-wrap gap-3">
+            {/* Sort By */}
+            <Select value={sortCriterion} onValueChange={setSortCriterion}>
+              <SelectTrigger className="h-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="importance_desc">Importance (High → Low)</SelectItem>
+                <SelectItem value="importance_asc">Importance (Low → High)</SelectItem>
+                <SelectItem value="alpha_asc">Alphabetical (A → Z)</SelectItem>
+                <SelectItem value="alpha_desc">Alphabetical (Z → A)</SelectItem>
+                <SelectItem value="by_tag">By Tag</SelectItem>
+                <SelectItem value="starred_first">Starred First</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Filter by Tag */}
+            <div className="relative">
+              <Button
+                variant="outline"
+                onClick={() => setShowTagFilter(!showTagFilter)}
+                className="h-10 border-gray-200 hover:bg-gray-50 rounded-lg"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filter by Tag
+              </Button>
+              
+              {showTagFilter && (
+                <TagFilterPanel
+                  allTags={allTags}
+                  selectedTags={filteredTags}
+                  onTagsChange={setFilteredTags}
+                  onClose={() => setShowTagFilter(false)}
+                />
+              )}
+            </div>
+
+            {/* Export */}
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              className="h-10 border-gray-200 hover:bg-gray-50 rounded-lg"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Notes List */}
-      <div className="space-y-4">
+      <div className="p-6">
         {processedNotes.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📝</div>
@@ -228,22 +215,24 @@ const AINotesResults: React.FC<AINotesResultsProps> = ({ notes, onNotesChange })
             <p className="text-gray-500">
               {searchQuery || filteredTags.length > 0 
                 ? 'Try adjusting your search or filter criteria.' 
-                : 'Use the form above to generate your first set of notes.'
+                : 'Use the form to generate your first set of notes.'
               }
             </p>
           </div>
         ) : (
-          processedNotes.map((note) => (
-            <AINotesSectionCard
-              key={note.sectionId}
-              note={note}
-              isExpanded={expandedSections.has(note.sectionId)}
-              onToggleExpanded={() => toggleExpanded(note.sectionId)}
-              onUpdateNote={(updates) => updateNote(note.sectionId, updates)}
-              onDeleteNote={() => deleteNote(note.sectionId)}
-              searchQuery={searchQuery}
-            />
-          ))
+          <div className="space-y-4">
+            {processedNotes.map((note) => (
+              <AINotesSectionCard
+                key={note.sectionId}
+                note={note}
+                isExpanded={expandedSections.has(note.sectionId)}
+                onToggleExpanded={() => toggleExpanded(note.sectionId)}
+                onUpdateNote={(updates) => updateNote(note.sectionId, updates)}
+                onDeleteNote={() => deleteNote(note.sectionId)}
+                searchQuery={searchQuery}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
