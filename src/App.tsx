@@ -18,6 +18,7 @@ import TestDetail from './pages/TestDetail';
 import CreatedTestDetail from './pages/CreatedTestDetail';
 import NotesGenerator from './pages/NotesGenerator';
 import AINotesGenerator from './pages/AINotesGenerator';
+import TeachingPlannerDashboard from './pages/TeachingPlannerDashboard';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/evaluated-tests/:testId" element={<TestDetail />} />
         <Route path="/notes-generator" element={<NotesGenerator />} />
         <Route path="/ai-notes-generator" element={<AINotesGenerator />} />
+        <Route path="/teaching-planner" element={<TeachingPlannerDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
