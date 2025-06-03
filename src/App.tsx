@@ -39,6 +39,7 @@ function App() {
         <Route path="/evaluated-tests" element={<EvaluatedTests />} />
         <Route path="/evaluated-tests/:testId" element={<TestDetail />} />
         <Route path="/notes-generator" element={<NotesGenerator />} />
+        <Route path="/ai-notes-generator" element={<AINotesGenerator />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
