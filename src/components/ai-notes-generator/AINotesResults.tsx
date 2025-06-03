@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Download, Funnel, Filter } from 'lucide-react';
+import { Search, Download, Filter } from 'lucide-react';
 import AINotesSectionCard from '@/components/ai-notes-generator/AINotesSectionCard';
 import TagFilterPanel from '@/components/ai-notes-generator/TagFilterPanel';
 
@@ -192,7 +191,7 @@ const AINotesResults: React.FC<AINotesResultsProps> = ({ notes, onNotesChange })
             className="border-blue-600 text-blue-600 hover:bg-blue-50"
             aria-label="Filter notes by tags"
           >
-            <Funnel className="h-4 w-4 mr-2" />
+            <Filter className="h-4 w-4 mr-2" />
             Filter by Tag
           </Button>
           

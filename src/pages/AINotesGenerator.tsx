@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +26,7 @@ import {
   Trash2,
   Star,
   Tag,
-  Filter,
-  Funnel
+  Filter
 } from 'lucide-react';
 import PromptGuidanceForm from '@/components/ai-notes-generator/PromptGuidanceForm';
 import AINotesResults from '@/components/ai-notes-generator/AINotesResults';

@@ -17,6 +17,7 @@ import EvaluatedTests from './pages/EvaluatedTests';
 import TestDetail from './pages/TestDetail';
 import CreatedTestDetail from './pages/CreatedTestDetail';
 import NotesGenerator from './pages/NotesGenerator';
+import AINotesGenerator from './pages/AINotesGenerator';
 import NotFound from './pages/NotFound';
 
 function App() {
