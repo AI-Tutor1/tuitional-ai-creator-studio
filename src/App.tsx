@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -15,6 +16,7 @@ import TeacherTestAnalytics from './pages/TeacherTestAnalytics';
 import EvaluatedTests from './pages/EvaluatedTests';
 import TestDetail from './pages/TestDetail';
 import CreatedTestDetail from './pages/CreatedTestDetail';
+import NotesGenerator from './pages/NotesGenerator';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
         <Route path="/student-tests" element={<StudentTests />} />
         <Route path="/evaluated-tests" element={<EvaluatedTests />} />
         <Route path="/evaluated-tests/:testId" element={<TestDetail />} />
+        <Route path="/notes-generator" element={<NotesGenerator />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
