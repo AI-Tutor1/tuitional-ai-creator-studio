@@ -23,6 +23,7 @@ import TeacherOCR from './TeacherOCR';
 import CalculatorComponent from './Calculator';
 import ImageUpload from './ImageUpload';
 import FileAttachment from './FileAttachment';
+import MatchingQuestionForm from './MatchingQuestionForm';
 
 interface EnhancedQuestionFormProps {
   question: EnhancedQuestion;
@@ -34,7 +35,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
   const [showOCR, setShowOCR] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showFileAttachment, setShowFileAttachment] = useState(false);
-  const [ocrTarget, setOcrTarget] = useState<{ field: string; optionIndex?: number } | null>(null);
+  const [ocrTarget, setOcrTarget] = useState<{ field: string; optionIndex?: number; matchingIndex?: number; matchingSide?: 'left' | 'right' } | null>(null);
 
   const handleOCRText = (text: string, insertMode: 'replace' | 'append' = 'append') => {
     if (!ocrTarget) return;
@@ -53,11 +54,20 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
         text: insertMode === 'replace' ? text : `${currentText}\n${text}`
       };
       onUpdate('mcqOptions', newOptions);
+    } else if (ocrTarget.field === 'matching' && ocrTarget.matchingIndex !== undefined && question.matchingPairs) {
+      const newPairs = [...question.matchingPairs];
+      const field = ocrTarget.matchingSide === 'left' ? 'leftItem' : 'rightItem';
+      const currentText = newPairs[ocrTarget.matchingIndex][field] || '';
+      newPairs[ocrTarget.matchingIndex] = {
+        ...newPairs[ocrTarget.matchingIndex],
+        [field]: insertMode === 'replace' ? text : `${currentText}\n${text}`
+      };
+      onUpdate('matchingPairs', newPairs);
     }
   };
 
-  const openOCR = (field: string, optionIndex?: number) => {
-    setOcrTarget({ field, optionIndex });
+  const openOCR = (field: string, optionIndex?: number, matchingIndex?: number, matchingSide?: 'left' | 'right') => {
+    setOcrTarget({ field, optionIndex, matchingIndex, matchingSide });
     setShowOCR(true);
   };
 
@@ -178,6 +188,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
               <SelectItem value="long">Long Answer</SelectItem>
               <SelectItem value="numerical">Numerical</SelectItem>
               <SelectItem value="diagram">Diagram</SelectItem>
+              <SelectItem value="matching">Matching</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -308,6 +319,15 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
         </Card>
       )}
 
+      {/* Matching Pairs */}
+      {question.subType === 'matching' && (
+        <MatchingQuestionForm
+          matchingPairs={question.matchingPairs || []}
+          onUpdate={(pairs) => onUpdate('matchingPairs', pairs)}
+          onOpenOCR={(field, pairIndex, side) => openOCR('matching', undefined, pairIndex, side)}
+        />
+      )}
+
       {/* Marking Scheme */}
       <Card className="bg-[#1E1E1E] border-gray-700">
         <CardHeader className="pb-3">
@@ -392,7 +412,7 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
             setShowOCR(false);
             setOcrTarget(null);
           }}
-          title={`Extract ${ocrTarget.field === 'question' ? 'Question' : ocrTarget.field === 'markingScheme' ? 'Marking Scheme' : 'Option'} Text`}
+          title={`Extract ${ocrTarget.field === 'question' ? 'Question' : ocrTarget.field === 'markingScheme' ? 'Marking Scheme' : ocrTarget.field === 'matching' ? 'Matching Item' : 'Option'} Text`}
           placeholder={`Upload an image containing the ${ocrTarget.field} text...`}
         />
       )}

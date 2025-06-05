@@ -6,6 +6,14 @@ export interface MCQOption {
   image?: string;
 }
 
+export interface MatchingPair {
+  id: string;
+  leftItem: string;
+  rightItem: string;
+  leftImage?: string;
+  rightImage?: string;
+}
+
 export interface QuestionAttachment {
   id: string;
   name: string;
@@ -20,8 +28,9 @@ export interface QuestionSubpart {
   partNumber: string;
   text: string;
   marks: number;
-  subType: 'mcq' | 'short' | 'long' | 'numerical' | 'diagram';
+  subType: 'mcq' | 'short' | 'long' | 'numerical' | 'diagram' | 'matching';
   mcqOptions?: MCQOption[];
+  matchingPairs?: MatchingPair[];
   markingScheme?: string;
 }
 
@@ -53,7 +62,7 @@ export interface EnhancedQuestion {
   id: string;
   questionNumber: number;
   type: 'question' | 'passage';
-  subType?: 'mcq' | 'short' | 'long' | 'numerical' | 'diagram';
+  subType?: 'mcq' | 'short' | 'long' | 'numerical' | 'diagram' | 'matching';
   text?: string;
   marks: number;
   includeAnswer: boolean;
@@ -62,6 +71,7 @@ export interface EnhancedQuestion {
   markingScheme?: string;
   attachments?: QuestionAttachment[];
   mcqOptions?: MCQOption[];
+  matchingPairs?: MatchingPair[];
   subparts?: QuestionSubpart[];
   metadata?: QuestionMetadata;
   

@@ -49,8 +49,15 @@ export const useQuestionBuilder = (initialQuestions: EnhancedQuestion[] = []) =>
                 { id: 'option_3', text: '', isCorrect: false },
                 { id: 'option_4', text: '', isCorrect: false }
               ];
+            } else if (value === 'matching' && !updatedQuestion.matchingPairs) {
+              updatedQuestion.matchingPairs = [
+                { id: 'pair_1', leftItem: '', rightItem: '' },
+                { id: 'pair_2', leftItem: '', rightItem: '' }
+              ];
             } else if (value !== 'mcq') {
               updatedQuestion.mcqOptions = undefined;
+            } else if (value !== 'matching') {
+              updatedQuestion.matchingPairs = undefined;
             }
           }
           
@@ -80,6 +87,10 @@ export const useQuestionBuilder = (initialQuestions: EnhancedQuestion[] = []) =>
       mcqOptions: questionToDuplicate.mcqOptions?.map(opt => ({
         ...opt,
         id: `option_${Date.now()}_${Math.random()}`
+      })),
+      matchingPairs: questionToDuplicate.matchingPairs?.map(pair => ({
+        ...pair,
+        id: `pair_${Date.now()}_${Math.random()}`
       }))
     };
 
