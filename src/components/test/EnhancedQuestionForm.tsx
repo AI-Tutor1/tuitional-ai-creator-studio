@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -239,7 +238,6 @@ const EnhancedQuestionForm: React.FC<EnhancedQuestionFormProps> = ({ question, o
         </CardContent>
       </Card>
 
-      {/* MCQ Options */}
       {question.subType === 'mcq' && (
         <Card className="bg-[#1E1E1E] border-gray-700">
           <CardHeader className="pb-3">
